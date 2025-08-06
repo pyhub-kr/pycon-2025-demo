@@ -25,17 +25,17 @@ class ChatSessionForm(forms.ModelForm):
         
         # 레이아웃 정의
         self.helper.layout = Layout(
-            Field('title', css_class='form-control'),
-            Field('instruction', rows=4, css_class='form-control'),
+            Field('title', css_class='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'),
+            Field('instruction', rows=4, css_class='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'),
             Div(
-                Div(Field('model', css_class='form-control'), css_class='flex-1'),
-                Div(Field('temperature', css_class='form-control'), css_class='flex-1'),
-                Div(Field('max_tokens', css_class='form-control'), css_class='flex-1'),
+                Div(Field('model', css_class='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'), css_class='flex-1'),
+                Div(Field('temperature', css_class='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'), css_class='flex-1'),
+                Div(Field('max_tokens', css_class='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'), css_class='flex-1'),
                 css_class='flex gap-4'
             ),
             Div(
-                Submit('submit', '세션 생성', css_class='btn-primary'),
-                HTML('<a href="{% url "roleplay:chatsession_list" %}" class="btn-secondary">취소</a>'),
+                Submit('submit', '세션 생성', css_class='px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'),
+                HTML('<a href="{% url "roleplay:chatsession_list" %}" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">취소</a>'),
                 css_class='flex gap-3 mt-6'
             )
         )

@@ -1,6 +1,8 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.views.generic import ListView, CreateView, UpdateView
 
 from .core import (
     ChatResponse,
@@ -9,6 +11,38 @@ from .core import (
     Difficulty,
     ChatService,
 )
+from .forms import ChatSessionForm
+
+from .models import ChatSession
+
+
+class ChatSessionListView(LoginRequiredMixin, ListView):
+    model = ChatSession
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.filter(user=self.request.user)
+        return qs
+
+
+class ChatSessionCreateView(LoginRequiredMixin, CreateView):
+    model = ChatSession
+    form_class = ChatSessionForm
+
+    def form_valid(self, form):
+        chatsession = form.save(commit=False)
+        chatsession.user = self.request.user
+        return super().form_valid(form)
+
+
+class ChatSessionUpdateView(LoginRequiredMixin, UpdateView):
+    model = ChatSession
+    form_class = ChatSessionForm
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.filter(user=self.request.user)
+        return qs
 
 
 @login_required

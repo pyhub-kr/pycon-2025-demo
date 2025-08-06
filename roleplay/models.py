@@ -15,8 +15,10 @@ class ChatSession(models.Model):
 
     # 기본 정보
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    title = models.CharField(max_length=200, blank=True, help_text="세션 제목")
-    instruction = models.TextField(help_text="시스템 프롬프트 (SimpleChatConfig의 instruction)")
+    title = models.CharField(max_length=200, help_text="세션 제목")
+    instruction = models.TextField(
+        help_text="시스템 프롬프트 (SimpleChatConfig의 instruction)",
+    )
 
     # 메타데이터
     created_at = models.DateTimeField(auto_now_add=True)
@@ -26,18 +28,16 @@ class ChatSession(models.Model):
     model = models.CharField(
         max_length=50,
         choices=LLMModels.choices,
-        default=LLMModels.choices,
+        default=LLMModels.GPT_4O_MINI,
         help_text="사용할 OpenAI AI 모델",
     )
     temperature = models.FloatField(
         default=1.0,
         validators=[MinValueValidator(0.0), MaxValueValidator(2.0)],
-        help_text="응답의 창의성 정도 (0.0~2.0)"
+        help_text="응답의 창의성 정도 (0.0~2.0)",
     )
     max_tokens = models.IntegerField(
-        default=1000,
-        validators=[MinValueValidator(1), MaxValueValidator(4096)],
-        help_text="최대 응답 토큰 수 (1~4096)"
+        default=1000, validators=[MinValueValidator(1), MaxValueValidator(4096)], help_text="최대 응답 토큰 수 (1~4096)"
     )
 
     class Meta:

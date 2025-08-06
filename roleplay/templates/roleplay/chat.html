@@ -3,6 +3,48 @@
 
 {% block content %}
     <div class="max-w-3xl mx-auto">
+        {# 세션 정보 표시 영역 #}
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-sm border border-blue-200 p-4 mb-4">
+            <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0">
+                    <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-blue-600 text-white">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                        </svg>
+                    </span>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-lg font-semibold text-gray-900">
+                        {{ session.title|default:"제목 없음" }}
+                    </h2>
+                    <p class="mt-1 text-sm text-gray-600">
+                        {{ session.instruction|linebreaksbr }}
+                    </p>
+                    <div class="mt-2 flex items-center space-x-4 text-xs text-gray-500">
+                        <span class="inline-flex items-center">
+                            <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            Model: {{ session.model }}
+                        </span>
+                        <span class="inline-flex items-center">
+                            <svg class="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            Temperature: {{ session.temperature }}
+                        </span>
+                        <span class="inline-flex items-center">
+                            <svg class="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
+                            </svg>
+                            Max Tokens: {{ session.max_tokens }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# 채팅 메시지 영역 #}
         <div id="chat-messages" class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4 h-96 overflow-y-auto space-y-3">
             {% for message in message_list %}
                 {% if message.role == "user" %}

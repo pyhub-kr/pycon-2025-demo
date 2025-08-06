@@ -53,7 +53,10 @@ def chat(request, pk) -> HttpResponse:
 
     if request.method == "GET":
         message_list = store.get_messages()
-        context_data = {"message_list": message_list}
+        context_data = {
+            "session": session,
+            "message_list": message_list,
+        }
         return render(request, "roleplay/chat.html", context_data)
 
     elif request.method == "POST":

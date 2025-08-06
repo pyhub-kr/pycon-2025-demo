@@ -1,5 +1,5 @@
 """
-새로운 채팅 세션 구조 테스트
+간소화된 채팅 세션 구조 테스트
 """
 
 import os
@@ -9,127 +9,145 @@ import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
 django.setup()
 
-from roleplay.core import SimpleChatConfig, RolePlayChatConfig, Difficulty, ChatService
-from roleplay.django_stores import (
-    GeneralDjangoChatHistoryStore,
-    RolePlayDjangoChatHistoryStore,
-    create_django_chat_store,
-)
-from roleplay.models import GeneralChatSession, RolePlayChatSession, ChatMessage
+from roleplay.core import SimpleChatConfig, ChatService
+from roleplay.django_stores import DjangoChatHistoryStore
+from roleplay.models import ChatSession, ChatMessage
 from django.contrib.auth.models import User
 
 
-def test_general_chat():
-    """일반 채팅 세션 테스트"""
-    print("\n=== 일반 채팅 세션 테스트 ===")
-
+def test_simple_chat():
+    """간단한 채팅 세션 테스트"""
+    print("\n=== 간단한 채팅 세션 테스트 ===")
+    
     # SimpleChatConfig 생성
-    config = SimpleChatConfig(instruction="You are a helpful assistant for general questions.")
-
-    # GeneralDjangoChatHistoryStore 생성
-    store = GeneralDjangoChatHistoryStore(config=config)
-
+    config = SimpleChatConfig(
+        instruction="You are a helpful assistant. Be concise and friendly."
+    )
+    
+    # DjangoChatHistoryStore 생성
+    store = DjangoChatHistoryStore(config=config)
+    
     # ChatService 생성
-    service = ChatService(config=config, chat_history_store=store, verbose=True)
-
-    # 메시지 전송
-    response = service.send("안녕하세요! 오늘 날씨가 어떤가요?")
-    print(f"\nAI 응답: {response.text}")
-
-    # 세션 확인
+    service = ChatService(
+        config=config, 
+        chat_history_store=store,
+        model="gpt-4o",
+        temperature=0.7,
+        max_tokens=500,
+        verbose=True
+    )
+    
+    # 첫 번째 메시지 전송
+    response1 = service.send("안녕하세요! 파이썬 프로그래밍에 대해 알고 싶어요.")
+    print(f"\nAI 응답: {response1.text}")
+    print(f"추천 표현: {response1.suggested_phrases[:3]}")
+    
+    # 두 번째 메시지 전송 (대화 이어가기)
+    response2 = service.send("파이썬의 주요 특징은 무엇인가요?")
+    print(f"\nAI 응답: {response2.text}")
+    
+    # 세션 정보 확인
     session = store.session
     print(f"\n세션 정보:")
     print(f"- ID: {session.id}")
-    print(f"- Purpose: {session.purpose}")
+    print(f"- Title: {session.title or 'Untitled'}")
     print(f"- Model: {session.model}")
     print(f"- Temperature: {session.temperature}")
+    print(f"- Max Tokens: {session.max_tokens}")
     print(f"- Total Tokens: {session.total_tokens}")
-
+    print(f"- Instruction (첫 50자): {session.instruction[:50]}...")
+    
     # 메시지 확인
     messages = store.get_messages()
-    print(f"\n메시지 수: {len(messages)}")
-
+    print(f"\n저장된 메시지 수: {len(messages)}")
+    for i, msg in enumerate(messages, 1):
+        print(f"  {i}. {msg.role}: {msg.content[:50]}...")
+    
     return session.id
 
 
-def test_roleplay_chat():
-    """역할극 채팅 세션 테스트"""
-    print("\n=== 역할극 채팅 세션 테스트 ===")
-
-    # RolePlayChatConfig 생성
-    config = RolePlayChatConfig(
-        language="English",
-        user_role="Tourist visiting Seoul",
-        gpt_role="Tour guide in Seoul",
-        difficulty=Difficulty.INTERMEDIATE,
-        role_template="Help the tourist explore Seoul's attractions.",
-    )
-
-    # RolePlayDjangoChatHistoryStore 생성
-    store = RolePlayDjangoChatHistoryStore(config=config)
-
-    # ChatService 생성
-    service = ChatService(config=config, chat_history_store=store, verbose=True)
-
-    # 메시지 전송
-    response = service.send("Where should I visit first in Seoul?")
-    print(f"\nAI 응답: {response.text}")
-    print(f"추천 표현: {response.suggested_phrases}")
-
-    # 세션 확인
+def test_existing_session(session_id):
+    """기존 세션 재사용 테스트"""
+    print(f"\n=== 기존 세션 재사용 테스트 (Session ID: {session_id}) ===")
+    
+    # 기존 세션을 사용하는 store 생성
+    store = DjangoChatHistoryStore(session_id=session_id)
+    
+    # 세션에서 설정 정보 복원
     session = store.session
-    print(f"\n세션 정보:")
-    print(f"- ID: {session.id}")
-    print(f"- Language: {session.language}")
-    print(f"- Difficulty: {session.difficulty}")
-    print(f"- Model: {session.model}")
-    print(f"- Temperature: {session.temperature}")
-    print(f"- Total Tokens: {session.total_tokens}")
-
-    return session.id
-
-
-def test_message_retrieval(general_session_id, roleplay_session_id):
-    """메시지 조회 테스트"""
-    print("\n=== 메시지 조회 테스트 ===")
-
-    # 일반 세션의 메시지 조회
-    general_session = GeneralChatSession.objects.get(id=general_session_id)
-    general_messages = ChatMessage.objects.filter(
-        content_type__model="generalchatsession", object_id=general_session.id
+    config = SimpleChatConfig(instruction=session.instruction)
+    
+    # ChatService 생성
+    service = ChatService(
+        config=config,
+        chat_history_store=store,
+        model=session.model,
+        temperature=session.temperature,
+        max_tokens=session.max_tokens,
+        verbose=False
     )
-    print(f"\n일반 세션 메시지 수: {general_messages.count()}")
-
-    # 역할극 세션의 메시지 조회
-    roleplay_session = RolePlayChatSession.objects.get(id=roleplay_session_id)
-    roleplay_messages = ChatMessage.objects.filter(
-        content_type__model="roleplaychatsession", object_id=roleplay_session.id
-    )
-    print(f"역할극 세션 메시지 수: {roleplay_messages.count()}")
-
-    # 전체 메시지 수
-    total_messages = ChatMessage.objects.count()
+    
+    # 이전 대화 이어가기
+    response = service.send("방금 설명한 내용을 요약해주세요.")
+    print(f"\nAI 응답: {response.text}")
+    
+    # 업데이트된 토큰 수 확인
+    session.refresh_from_db()
+    print(f"\n업데이트된 총 토큰 수: {session.total_tokens}")
+    
+    # 전체 메시지 수 확인
+    total_messages = store.get_message_count()
     print(f"전체 메시지 수: {total_messages}")
+
+
+def test_database_queries():
+    """데이터베이스 직접 쿼리 테스트"""
+    print("\n=== 데이터베이스 쿼리 테스트 ===")
+    
+    # 모든 세션 조회
+    sessions = ChatSession.objects.all()
+    print(f"\n총 세션 수: {sessions.count()}")
+    
+    for session in sessions:
+        print(f"\n세션 #{session.id}:")
+        print(f"  - 제목: {session.title or 'Untitled'}")
+        print(f"  - 활성 상태: {session.is_active}")
+        print(f"  - 메시지 수: {session.messages.count()}")
+        print(f"  - 총 토큰: {session.total_tokens}")
+        
+        # 해당 세션의 메시지들
+        messages = session.messages.all()[:3]  # 처음 3개만
+        for msg in messages:
+            print(f"    • {msg.role}: {msg.content[:30]}...")
+    
+    # 전체 메시지 통계
+    total_messages = ChatMessage.objects.count()
+    user_messages = ChatMessage.objects.filter(role="user").count()
+    assistant_messages = ChatMessage.objects.filter(role="assistant").count()
+    
+    print(f"\n메시지 통계:")
+    print(f"  - 전체: {total_messages}")
+    print(f"  - User: {user_messages}")
+    print(f"  - Assistant: {assistant_messages}")
 
 
 def main():
     """메인 테스트 함수"""
     try:
-        # 일반 채팅 테스트
-        general_session_id = test_general_chat()
-
-        # 역할극 채팅 테스트
-        roleplay_session_id = test_roleplay_chat()
-
-        # 메시지 조회 테스트
-        test_message_retrieval(general_session_id, roleplay_session_id)
-
+        # 1. 새 세션으로 채팅 테스트
+        session_id = test_simple_chat()
+        
+        # 2. 기존 세션 재사용 테스트
+        test_existing_session(session_id)
+        
+        # 3. 데이터베이스 쿼리 테스트
+        test_database_queries()
+        
         print("\n✅ 모든 테스트가 성공적으로 완료되었습니다!")
-
+        
     except Exception as e:
         print(f"\n❌ 테스트 중 오류 발생: {e}")
         import traceback
-
         traceback.print_exc()
 
 

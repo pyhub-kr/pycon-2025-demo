@@ -10,7 +10,8 @@
       "Bash(curl:*)",
       "Bash(uv run:*)",
       "Bash(mkdir:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }

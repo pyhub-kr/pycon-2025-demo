@@ -1,132 +1,94 @@
 from django.contrib import admin
-from .models import GeneralChatSession, RolePlayChatSession, ChatMessage
+from .models import ChatSession, ChatMessage
 
 
-# 새로운 모델들의 Admin 클래스
-
-
-@admin.register(GeneralChatSession)
-class GeneralChatSessionAdmin(admin.ModelAdmin):
+@admin.register(ChatSession)
+class ChatSessionAdmin(admin.ModelAdmin):
+    """채팅 세션 Admin"""
+    
     list_display = [
         "id",
-        "title",
-        "purpose",
+        "title_display",
         "user",
+        "model",
         "total_tokens",
         "is_active",
         "created_at",
     ]
-    list_filter = ["purpose", "is_active", "created_at"]
-    search_fields = ["title", "context", "user__username"]
-    readonly_fields = ["created_at", "updated_at", "input_tokens", "output_tokens", "total_tokens"]
+    list_filter = ["is_active", "model", "created_at"]
+    search_fields = ["title", "instruction", "user__username"]
+    readonly_fields = ["created_at", "updated_at", "total_tokens"]
     date_hierarchy = "created_at"
-
+    
     fieldsets = (
-        ("기본 정보", {"fields": ("user", "title", "purpose", "is_active")}),
-        ("컨텍스트", {"fields": ("context", "system_prompt")}),
-        ("모델 설정", {"fields": ("model", "temperature", "max_tokens")}),
-        (
-            "토큰 사용량",
-            {
-                "fields": ("input_tokens", "output_tokens", "total_tokens"),
-                "classes": ("collapse",),
-            },
-        ),
-        (
-            "타임스탬프",
-            {
-                "fields": ("created_at", "updated_at"),
-                "classes": ("collapse",),
-            },
-        ),
+        ("기본 정보", {
+            "fields": ("user", "title", "is_active")
+        }),
+        ("시스템 프롬프트", {
+            "fields": ("instruction",)
+        }),
+        ("AI 모델 설정", {
+            "fields": ("model", "temperature", "max_tokens")
+        }),
+        ("통계", {
+            "fields": ("total_tokens",),
+            "classes": ("collapse",),
+        }),
+        ("타임스탬프", {
+            "fields": ("created_at", "updated_at"),
+            "classes": ("collapse",),
+        }),
     )
-
-
-@admin.register(RolePlayChatSession)
-class RolePlayChatSessionAdmin(admin.ModelAdmin):
-    list_display = [
-        "id",
-        "prompt_name",
-        "language",
-        "difficulty",
-        "user",
-        "total_tokens",
-        "is_active",
-        "created_at",
-    ]
-    list_filter = ["language", "difficulty", "is_active", "created_at"]
-    search_fields = ["prompt_name", "title", "user__username"]
-    readonly_fields = ["created_at", "updated_at", "input_tokens", "output_tokens", "total_tokens"]
-    date_hierarchy = "created_at"
-
-    fieldsets = (
-        ("기본 정보", {"fields": ("user", "title", "is_active")}),
-        ("역할극 설정", {"fields": ("prompt_name", "language", "user_role", "gpt_role", "difficulty")}),
-        ("프롬프트", {"fields": ("system_prompt",)}),
-        ("모델 설정", {"fields": ("model", "temperature", "max_tokens")}),
-        (
-            "토큰 사용량",
-            {
-                "fields": ("input_tokens", "output_tokens", "total_tokens"),
-                "classes": ("collapse",),
-            },
-        ),
-        (
-            "타임스탬프",
-            {
-                "fields": ("created_at", "updated_at"),
-                "classes": ("collapse",),
-            },
-        ),
-    )
+    
+    def title_display(self, obj):
+        """제목 표시 (없으면 Session #ID)"""
+        return obj.title or f"Session #{obj.id}"
+    title_display.short_description = "Title"
 
 
 @admin.register(ChatMessage)
 class ChatMessageAdmin(admin.ModelAdmin):
-    list_display = ["id", "session_info", "role", "content_preview", "total_tokens_display", "created_at"]
-    list_filter = ["role", "created_at", "content_type"]
-    search_fields = ["content"]
-    readonly_fields = ["created_at", "input_tokens", "output_tokens", "content_type", "object_id"]
+    """채팅 메시지 Admin"""
+    
+    list_display = [
+        "id",
+        "session",
+        "role",
+        "content_preview",
+        "token_count",
+        "created_at",
+    ]
+    list_filter = ["role", "created_at"]
+    search_fields = ["content", "session__title"]
+    readonly_fields = ["created_at"]
+    raw_id_fields = ["session"]
     date_hierarchy = "created_at"
-
-    # Generic FK는 raw_id_fields를 직접 사용할 수 없으므로 제거
-    # raw_id_fields = []
-
+    
     fieldsets = (
-        ("세션 정보", {"fields": ("content_type", "object_id")}),
-        ("메시지 정보", {"fields": ("role", "content", "created_at")}),
-        (
-            "토큰 사용량",
-            {
-                "fields": ("input_tokens", "output_tokens"),
-                "classes": ("collapse",),
-                "description": "Assistant 메시지에만 해당",
-            },
-        ),
+        ("세션 정보", {
+            "fields": ("session",)
+        }),
+        ("메시지 정보", {
+            "fields": ("role", "content")
+        }),
+        ("토큰 정보", {
+            "fields": ("token_count",),
+            "classes": ("collapse",),
+            "description": "Assistant 메시지의 경우 토큰 수가 기록됩니다"
+        }),
+        ("생성 시간", {
+            "fields": ("created_at",),
+            "classes": ("collapse",),
+        }),
     )
-
-    def session_info(self, obj):
-        """세션 정보를 표시"""
-        session = obj.session
-        if session:
-            if hasattr(session, "prompt_name"):
-                return f"{session.prompt_name} (ID: {session.id})"
-            elif hasattr(session, "title"):
-                return f"{session.title or 'Untitled'} (ID: {session.id})"
-            else:
-                return f"Session {session.id}"
-        return "-"
-
-    session_info.short_description = "Session"
-
+    
     def content_preview(self, obj):
+        """내용 미리보기"""
         return obj.content[:100] + "..." if len(obj.content) > 100 else obj.content
-
     content_preview.short_description = "Content Preview"
 
-    def total_tokens_display(self, obj):
-        if obj.input_tokens and obj.output_tokens:
-            return obj.input_tokens + obj.output_tokens
-        return "-"
 
-    total_tokens_display.short_description = "Total Tokens"
+# Admin 사이트 커스터마이징
+admin.site.site_header = "채팅 히스토리 관리"
+admin.site.site_title = "Chat Admin"
+admin.site.index_title = "채팅 세션 및 메시지 관리"

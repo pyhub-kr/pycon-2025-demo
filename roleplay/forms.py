@@ -23,14 +23,17 @@ class ChatSessionForm(forms.ModelForm):
         self.helper.form_method = 'post'
         self.helper.form_class = 'space-y-4'
         
+        # 공통 input 스타일
+        input_class = 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+        
         # 레이아웃 정의
         self.helper.layout = Layout(
-            Field('title', css_class='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'),
-            Field('instruction', rows=4, css_class='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'),
+            Field('title', css_class=input_class),
+            Field('instruction', rows=4, css_class=input_class),
             Div(
-                Div(Field('model', css_class='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'), css_class='flex-1'),
-                Div(Field('temperature', css_class='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'), css_class='flex-1'),
-                Div(Field('max_tokens', css_class='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'), css_class='flex-1'),
+                Field('model', css_class=input_class, wrapper_class='flex-1'),
+                Field('temperature', css_class=input_class, wrapper_class='flex-1'),
+                Field('max_tokens', css_class=input_class, wrapper_class='flex-1'),
                 css_class='flex gap-4'
             ),
             Div(

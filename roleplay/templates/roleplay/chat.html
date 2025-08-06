@@ -1,26 +1,51 @@
-<!doctype html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8" />
-    <title>roleplay</title>
-    <script src="://cdn.tailwindcss.com"></script>
-</head>
-<body>
+{% extends "roleplay/base.html" %}
+{% load crispy_forms_tags %}
 
-    <div id="chat-messages"></div>
+{% block content %}
+    <div class="max-w-3xl mx-auto">
+        <div id="chat-messages" class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4 h-96 overflow-y-auto space-y-3">
+            {% for message in message_list %}
+                {% if message.role == "user" %}
+                    <div class="flex justify-end">
+                        <div class="bg-blue-100 rounded-lg px-3 py-2 max-w-xs lg:max-w-md">
+                            <span class="text-sm font-semibold text-blue-900">You</span>
+                            <p class="text-gray-800">{{ message.content }}</p>
+                        </div>
+                    </div>
+                {% elif message.role == "assistant" %}
+                    <div class="flex justify-start">
+                        <div class="bg-gray-100 rounded-lg px-3 py-2 max-w-xs lg:max-w-md">
+                            <span class="text-sm font-semibold text-gray-700">AI</span>
+                            <p class="text-gray-800 whitespace-pre-wrap">{{ message.content }}</p>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
 
-    <form id="chat-message-form" action="" method="post" novalidate>
-        {% csrf_token %}
-        <input type="text" name="message" autocomplete="off" />
-        <input type="submit" />
-    </form>
+        <form id="chat-message-form" action="" method="post" novalidate class="flex gap-2">
+            {% csrf_token %}
+            <input type="text" name="message" autocomplete="off" 
+                   class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   placeholder="메시지를 입력하세요..." />
+            <input type="submit" value="전송"
+                   class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer" />
+        </form>
 
-    <div id="advice"></div>
+        <div id="advice" class="mt-4 p-4 bg-gray-50 rounded-lg text-sm text-gray-600"></div>
+    </div>
+{% endblock %}
 
+{% block extra-script %}
     <script>
         const formEl = document.querySelector("#chat-message-form");
         const chatMessagesEl = document.querySelector("#chat-messages");
         const adviceEl = document.querySelector("#advice");
+
+        // 페이지 로드 시 스크롤을 맨 아래로
+        window.addEventListener('load', () => {
+            chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+        });
 
         formEl.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -31,11 +56,23 @@
             const humanMessage = props.message;
 
             chatMessagesEl.innerHTML += `
-                <div>You: ${humanMessage}</div>
+                <div class="flex justify-end">
+                    <div class="bg-blue-100 rounded-lg px-3 py-2 max-w-xs lg:max-w-md">
+                        <span class="text-sm font-semibold text-blue-900">You</span>
+                        <p class="text-gray-800">${humanMessage}</p>
+                    </div>
+                </div>
             `;
             const aiEl = document.createElement("div");
-            aiEl.textContent = "Loading ...";
+            aiEl.className = "flex justify-start";
+            aiEl.innerHTML = `
+                <div class="bg-gray-100 rounded-lg px-3 py-2 max-w-xs lg:max-w-md">
+                    <span class="text-sm font-semibold text-gray-700">AI</span>
+                    <p class="text-gray-800">Loading...</p>
+                </div>
+            `;
             chatMessagesEl.appendChild(aiEl);
+            chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
 
             try {
                 const response = await fetch(url, {
@@ -49,14 +86,25 @@
 
                 const data = await response.json();
 
-                aiEl.innerHTML = `<pre>AI: ${data.text}</pre>`;
+                aiEl.innerHTML = `
+                    <div class="bg-gray-100 rounded-lg px-3 py-2 max-w-xs lg:max-w-md">
+                        <span class="text-sm font-semibold text-gray-700">AI</span>
+                        <p class="text-gray-800 whitespace-pre-wrap">${data.text}</p>
+                    </div>
+                `;
+                chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
 
                 adviceEl.innerHTML = `
-                    <div>사용량 - input ${data.usage.input_tokens}, output ${data.usage.output_tokens}</div>
-                    <h3>이어서 쓸 수 있는 표현들</h3>
-                    <ul>
-                    ${data.suggested_phrases.map(phrase => `<li>${phrase}</li>`).join("")}
-                    </ul>
+                    <div class="mb-2">
+                        <span class="font-semibold">토큰 사용량:</span> 
+                        입력 ${data.usage.input_tokens}, 출력 ${data.usage.output_tokens}
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-1">추천 표현:</h3>
+                        <ul class="list-disc list-inside space-y-1">
+                        ${data.suggested_phrases.map(phrase => `<li>${phrase}</li>`).join("")}
+                        </ul>
+                    </div>
                 `;
             } catch (error) {
                 console.error("Error:", error);
@@ -66,6 +114,4 @@
             e.target.reset();
         });
     </script>
-
-</body>
-</html>
+{% endblock %}

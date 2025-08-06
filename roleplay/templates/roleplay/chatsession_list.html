@@ -6,12 +6,14 @@
         
         {% if object_list %}
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 divide-y divide-gray-200">
-                {% for session in object_list %}
+                {% for session in chatsession_list %}
                     <div class="p-4 hover:bg-gray-50 transition-colors">
                         <div class="flex justify-between items-start">
                             <div>
                                 <h3 class="font-medium text-gray-900">
-                                    {{ session.title|default:"제목 없음" }}
+                                    <a href="{% url 'roleplay:chat' session.pk %}" class="hover:text-blue-600 hover:underline">
+                                        {{ session.title|default:"제목 없음" }}
+                                    </a>
                                 </h3>
                                 <p class="text-sm text-gray-600 mt-1">
                                     {{ session.instruction|truncatechars:100 }}
@@ -20,7 +22,7 @@
                                     생성일: {{ session.created_at|date:"Y-m-d H:i" }}
                                 </p>
                             </div>
-                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded whitespace-nowrap">
                                 {{ session.model }}
                             </span>
                         </div>

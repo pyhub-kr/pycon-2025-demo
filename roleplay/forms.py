@@ -1,3 +1,5 @@
+# roleplay/forms.py
+
 from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Div, Submit, HTML
@@ -15,6 +17,7 @@ class ChatSessionForm(forms.ModelForm):
             "max_tokens",
         ]
 
+    # django-crispy-forms를 통해 폼 렌더링 커스터마이징
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

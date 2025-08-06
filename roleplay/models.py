@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-
+from django.urls import reverse
 
 User = get_user_model()
 
@@ -20,10 +20,6 @@ class ChatSession(models.Model):
         help_text="시스템 프롬프트 (SimpleChatConfig의 instruction)",
     )
 
-    # 메타데이터
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
     # AI 설정 (선택적)
     model = models.CharField(
         max_length=50,
@@ -37,8 +33,13 @@ class ChatSession(models.Model):
         help_text="응답의 창의성 정도 (0.0~2.0)",
     )
     max_tokens = models.IntegerField(
-        default=1000, validators=[MinValueValidator(1), MaxValueValidator(4096)], help_text="최대 응답 토큰 수 (1~4096)"
+        default=1000,
+        validators=[MinValueValidator(1), MaxValueValidator(4096)],
+        help_text="최대 응답 토큰 수 (1~4096)",
     )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "채팅 세션"
@@ -47,6 +48,9 @@ class ChatSession(models.Model):
 
     def __str__(self):
         return self.title or f"Session #{self.id}"
+
+    def get_absolute_url(self) -> str:
+        return reverse("roleplay:chat", args=(self.id,))
 
 
 class ChatMessage(models.Model):

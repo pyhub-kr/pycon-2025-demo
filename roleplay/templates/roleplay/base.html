@@ -10,7 +10,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Header -->
+    {# Header #}
     <header class="bg-blue-600 text-white py-4 shadow-md">
         <div class="container mx-auto px-4 max-w-4xl">
             <h1 class="text-2xl font-bold">
@@ -21,17 +21,20 @@
         </div>
     </header>
 
-    <!-- Main Content -->
+    {# Main Content #}
     <main class="flex-grow container mx-auto px-4 py-8 max-w-4xl">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
+    {# Footer #}
     <footer class="bg-gray-800 text-white py-4 mt-auto">
         <div class="container mx-auto px-4 max-w-4xl text-center">
             <p>&copy; 2025. 이진석</p>
         </div>
     </footer>
+
+    {# extra script #}
+    {% block extra-script %}{% endblock %}
 
 </body>
 </html>

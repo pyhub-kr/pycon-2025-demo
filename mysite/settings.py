@@ -70,16 +70,24 @@ TEMPLATES = [
 WSGI_APPLICATION = "mysite.wsgi.application"
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# 프로젝트/settings.py
 
 DATABASES = {
+    # sqlite3의 경우
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
-    }
+    },
+    # postgresql의 경우
+    # "other": {
+    #     "ENGINE": "django.db.backends.postgresql",
+    #     "NAME": "your_db_name",
+    #     "USER": "your_db_user",
+    #     "PASSWORD": "your_db_password",
+    #     "HOST": "localhost",  # 또는 RDS 주소 등
+    #     "PORT": "5432",  # PostgreSQL 기본 포트
+    # },
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

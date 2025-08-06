@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>roleplay</title>
+    <script src="://cdn.tailwindcss.com"></script>
+</head>
+<body>
+
+    <div id="chat-messages"></div>
+
+    <form id="chat-message-form" action="" method="post" novalidate>
+        {% csrf_token %}
+        <input type="text" name="message" autocomplete="off" />
+        <input type="submit" />
+    </form>
+
+    <div id="advice"></div>
+
+    <script>
+        const formEl = document.querySelector("#chat-message-form");
+        const chatMessagesEl = document.querySelector("#chat-messages");
+        const adviceEl = document.querySelector("#advice");
+
+        formEl.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const url = e.target.action;
+            const formData = new FormData(e.target);
+            const props = Object.fromEntries(formData);
+            const humanMessage = props.message;
+
+            chatMessagesEl.innerHTML += `
+                <div>You: ${humanMessage}</div>
+            `;
+            const aiEl = document.createElement("div");
+            aiEl.textContent = "Loading ...";
+            chatMessagesEl.appendChild(aiEl);
+
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                aiEl.innerHTML = `<pre>AI: ${data.text}</pre>`;
+
+                adviceEl.innerHTML = `
+                    <div>사용량 - input ${data.usage.input_tokens}, output ${data.usage.output_tokens}</div>
+                    <h3>이어서 쓸 수 있는 표현들</h3>
+                    <ul>
+                    ${data.suggested_phrases.map(phrase => `<li>${phrase}</li>`).join("")}
+                    </ul>
+                `;
+            } catch (error) {
+                console.error("Error:", error);
+                alert("메시지 전송 중 오류가 발생했습니다.");
+            }
+
+            e.target.reset();
+        });
+    </script>
+
+</body>
+</html>

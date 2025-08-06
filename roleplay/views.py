@@ -9,7 +9,6 @@ from .core import (
     Difficulty,
     ChatService,
 )
-from .prompts import STARBUCKS_PROMPT
 
 
 @login_required
@@ -18,13 +17,6 @@ def chat(request) -> HttpResponse:
 
     # 데이터베이스에서 조회하기 (추후 구현)
     config = SimpleChatConfig(instruction="You're a helpful assistant.")
-    # config = RolePlayChatConfig(
-    #     language="ko",
-    #     user_role="고객",
-    #     gpt_role="직원",
-    #     difficulty=Difficulty.BEGINNER,
-    #     role_template=STARBUCKS_PROMPT,
-    # )
     chat_service = ChatService(
         config=config,
         model="gpt-4o-mini",

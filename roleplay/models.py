@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 
@@ -8,6 +9,10 @@ User = get_user_model()
 class ChatSession(models.Model):
     """단순한 채팅 세션 모델"""
 
+    class LLMModels(models.TextChoices):
+        GPT_4O = "gpt-4o", "gpt-4o"
+        GPT_4O_MINI = "gpt-4o-mini", "gpt-4o-mini"
+
     # 기본 정보
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=200, blank=True, help_text="세션 제목")
@@ -16,12 +21,24 @@ class ChatSession(models.Model):
     # 메타데이터
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    is_active = models.BooleanField(default=True)
 
     # AI 설정 (선택적)
-    model = models.CharField(max_length=50, default="gpt-4o", help_text="사용할 AI 모델")
-    temperature = models.FloatField(default=1.0, help_text="응답의 창의성 정도 (0.0~2.0)")
-    max_tokens = models.IntegerField(default=1000, help_text="최대 응답 토큰 수")
+    model = models.CharField(
+        max_length=50,
+        choices=LLMModels.choices,
+        default=LLMModels.choices,
+        help_text="사용할 OpenAI AI 모델",
+    )
+    temperature = models.FloatField(
+        default=1.0,
+        validators=[MinValueValidator(0.0), MaxValueValidator(2.0)],
+        help_text="응답의 창의성 정도 (0.0~2.0)"
+    )
+    max_tokens = models.IntegerField(
+        default=1000,
+        validators=[MinValueValidator(1), MaxValueValidator(4096)],
+        help_text="최대 응답 토큰 수 (1~4096)"
+    )
 
     class Meta:
         verbose_name = "채팅 세션"

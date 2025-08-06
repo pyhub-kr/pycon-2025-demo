@@ -2,29 +2,24 @@
 
 """가장 간단한 RolePlay 테스트"""
 
-from roleplay.core import RolePlayChatConfig, InMemoryStore, ChatService, Difficulty
+# 장고 프로젝트 외부에서 장고 프로젝트 내부 리소스에 접근하기 위한 초기화
+import os
+from typing import Optional
 
-# config = SimpleChatConfig(instruction="You're a helpful assistant.")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
+import django
 
-role_template = """You are a friendly barista at Starbucks.
-You help customers order coffee and provide recommendations.
+django.setup()
 
-Menu:
-- Coffee: Americano, Latte, Cappuccino
-- Sizes: Tall, Grande, Venti
-- Customizations: Different milk options, syrups
+# 장고 프로젝트 내부 리소스에 접근
+from roleplay.core import SimpleChatConfig, ChatService
+from roleplay.django_stores import DjangoChatHistoryStore
 
-Be friendly and helpful in your responses."""
+config = SimpleChatConfig(instruction="You're a helpful assistant.")
 
-config = RolePlayChatConfig(
-    language="English",
-    user_role="커피 주문하는 손님이며, 이름은 이진석",
-    gpt_role="스타벅스 직원이며, 이름은 John.",
-    difficulty=Difficulty.BEGINNER,
-    role_template=role_template,
-)
-
-service = ChatService(config=config, chat_history_store=InMemoryStore())
+session_id: Optional[int] = None  # 새로운 대화방 세션 생성
+store = DjangoChatHistoryStore(session_id=session_id, config=config)
+service = ChatService(config=config, chat_history_store=store)
 
 # 생략
 

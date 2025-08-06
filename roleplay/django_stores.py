@@ -4,7 +4,7 @@ Django-specific chat history storage implementation.
 
 from typing import Optional
 from .core import Message, BaseChatConfig, SimpleChatConfig, BaseChatHistoryStore, UsageInfo
-from .models import ChatMessage
+from .models import ChatSession, ChatMessage
 
 
 class DjangoChatHistoryStore(BaseChatHistoryStore):
@@ -28,8 +28,6 @@ class DjangoChatHistoryStore(BaseChatHistoryStore):
     def session(self):
         """세션 객체를 lazy loading으로 가져오거나 생성"""
         if self._session is None:
-            from .models import ChatSession
-
             if self.session_id:
                 # 기존 세션 로드
                 self._session = ChatSession.objects.get(pk=self.session_id)

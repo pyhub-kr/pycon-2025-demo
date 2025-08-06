@@ -1,21 +1,20 @@
-from roleplay.models import ChatSession, ChatMessage
+from roleplay.core import SimpleChatConfig, InMemoryStore, ChatService
 
-# 새로운 세션 생성
-session = ChatSession.objects.create(
-    user=user,
-    instruction="You're a helpful assistant.",
-    model="gpt-4o",
-    temperature=1.0,
-    max_tokens=1000,
-)
+config = SimpleChatConfig(instruction="You're a helpful assistant.")
 
-# 대화 메시지 저장
-ChatMessage.objects.create(session=session, role="user", content="hello")
-session.message_set.create(role="assistant", content="Can I help you?")
+store = InMemoryStore()
+service = ChatService(config=config, chat_history_store=store)
 
-# 세션의 모든 메시지 조회
-message_qs = ChatMessage.objects.filter(session=session)
-message_qs = session.message_set.all()
+human_message = "Hello. My name is Chinseok."
+print("Human :", human_message)
+response = service.send(human_message)
+print("AI :", response)
 
-# 세션의 모든 메시지를 삭제
-message_qs.delete()
+human_message = "What's my name?"
+print("Human :", human_message)
+response = service.send(human_message)
+print("AI :", response)
+
+print("\n=== 이어서 쓸 수 있는 표현들 ===")
+for phrase in response.suggested_phrases:
+    print(f"  • {phrase}")

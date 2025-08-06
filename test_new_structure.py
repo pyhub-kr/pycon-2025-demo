@@ -100,10 +100,10 @@ def test_database_queries():
         print(f"\n세션 #{session.id}:")
         print(f"  - 제목: {session.title or 'Untitled'}")
         print(f"  - 활성 상태: {session.is_active}")
-        print(f"  - 메시지 수: {session.messages.count()}")
+        print(f"  - 메시지 수: {session.message_set.count()}")
 
         # 해당 세션의 메시지들
-        messages = session.messages.all()[:3]  # 처음 3개만
+        messages = session.message_set.all()[:3]  # 처음 3개만
         for msg in messages:
             print(f"    • {msg.role}: {msg.content[:30]}...")
 

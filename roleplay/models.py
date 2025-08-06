@@ -38,7 +38,7 @@ class ChatMessage(models.Model):
         SYSTEM = "system", "System"
 
     # 세션과의 관계
-    session = models.ForeignKey(ChatSession, on_delete=models.CASCADE, related_name="messages")
+    session = models.ForeignKey(ChatSession, on_delete=models.CASCADE, related_name="message_set")
 
     # 메시지 정보
     role = models.CharField(max_length=20, choices=RoleChoices.choices)

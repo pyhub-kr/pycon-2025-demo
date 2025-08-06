@@ -5,57 +5,49 @@ from .models import ChatSession, ChatMessage
 @admin.register(ChatSession)
 class ChatSessionAdmin(admin.ModelAdmin):
     """채팅 세션 Admin"""
-    
+
     list_display = [
         "id",
         "title_display",
         "user",
         "model",
-        "total_tokens",
         "is_active",
         "created_at",
     ]
     list_filter = ["is_active", "model", "created_at"]
     search_fields = ["title", "instruction", "user__username"]
-    readonly_fields = ["created_at", "updated_at", "total_tokens"]
+    readonly_fields = ["created_at", "updated_at"]
     date_hierarchy = "created_at"
-    
+
     fieldsets = (
-        ("기본 정보", {
-            "fields": ("user", "title", "is_active")
-        }),
-        ("시스템 프롬프트", {
-            "fields": ("instruction",)
-        }),
-        ("AI 모델 설정", {
-            "fields": ("model", "temperature", "max_tokens")
-        }),
-        ("통계", {
-            "fields": ("total_tokens",),
-            "classes": ("collapse",),
-        }),
-        ("타임스탬프", {
-            "fields": ("created_at", "updated_at"),
-            "classes": ("collapse",),
-        }),
+        ("기본 정보", {"fields": ("user", "title", "is_active")}),
+        ("시스템 프롬프트", {"fields": ("instruction",)}),
+        ("AI 모델 설정", {"fields": ("model", "temperature", "max_tokens")}),
+        (
+            "타임스탬프",
+            {
+                "fields": ("created_at", "updated_at"),
+                "classes": ("collapse",),
+            },
+        ),
     )
-    
+
     def title_display(self, obj):
         """제목 표시 (없으면 Session #ID)"""
         return obj.title or f"Session #{obj.id}"
+
     title_display.short_description = "Title"
 
 
 @admin.register(ChatMessage)
 class ChatMessageAdmin(admin.ModelAdmin):
     """채팅 메시지 Admin"""
-    
+
     list_display = [
         "id",
         "session",
         "role",
         "content_preview",
-        "token_count",
         "created_at",
     ]
     list_filter = ["role", "created_at"]
@@ -63,28 +55,23 @@ class ChatMessageAdmin(admin.ModelAdmin):
     readonly_fields = ["created_at"]
     raw_id_fields = ["session"]
     date_hierarchy = "created_at"
-    
+
     fieldsets = (
-        ("세션 정보", {
-            "fields": ("session",)
-        }),
-        ("메시지 정보", {
-            "fields": ("role", "content")
-        }),
-        ("토큰 정보", {
-            "fields": ("token_count",),
-            "classes": ("collapse",),
-            "description": "Assistant 메시지의 경우 토큰 수가 기록됩니다"
-        }),
-        ("생성 시간", {
-            "fields": ("created_at",),
-            "classes": ("collapse",),
-        }),
+        ("세션 정보", {"fields": ("session",)}),
+        ("메시지 정보", {"fields": ("role", "content")}),
+        (
+            "생성 시간",
+            {
+                "fields": ("created_at",),
+                "classes": ("collapse",),
+            },
+        ),
     )
-    
+
     def content_preview(self, obj):
         """내용 미리보기"""
         return obj.content[:100] + "..." if len(obj.content) > 100 else obj.content
+
     content_preview.short_description = "Content Preview"
 
 

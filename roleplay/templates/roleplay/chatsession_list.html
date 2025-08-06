@@ -1,8 +1,43 @@
 {% extends "roleplay/base.html" %}
 
 {% block content %}
-    {{ object_list }}
-
-    <hr />
-    <a href="{% url 'roleplay:chatsession_new' %}">New Chat Session</a>
+    <div class="space-y-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">채팅 세션 목록</h2>
+        
+        {% if object_list %}
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 divide-y divide-gray-200">
+                {% for session in object_list %}
+                    <div class="p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-medium text-gray-900">
+                                    {{ session.title|default:"제목 없음" }}
+                                </h3>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    {{ session.instruction|truncatechars:100 }}
+                                </p>
+                                <p class="text-xs text-gray-500 mt-2">
+                                    생성일: {{ session.created_at|date:"Y-m-d H:i" }}
+                                </p>
+                            </div>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                {{ session.model }}
+                            </span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-gray-50 rounded-lg p-8 text-center">
+                <p class="text-gray-600">아직 생성된 채팅 세션이 없습니다.</p>
+            </div>
+        {% endif %}
+        
+        <div class="pt-4">
+            <a href="{% url 'roleplay:chatsession_new' %}" 
+               class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                새 채팅 세션 만들기
+            </a>
+        </div>
+    </div>
 {% endblock %}

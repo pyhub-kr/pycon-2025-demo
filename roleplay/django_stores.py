@@ -4,6 +4,7 @@ Django-specific chat history storage implementation.
 
 from typing import Optional
 from .core import Message, BaseChatConfig, SimpleChatConfig, BaseChatHistoryStore, UsageInfo
+from .models import ChatMessage
 
 
 class DjangoChatHistoryStore(BaseChatHistoryStore):
@@ -56,7 +57,6 @@ class DjangoChatHistoryStore(BaseChatHistoryStore):
 
     def add_message(self, message: Message) -> None:
         """메시지를 데이터베이스에 추가"""
-        from .models import ChatMessage
 
         # 메시지 생성
         ChatMessage.objects.create(
@@ -67,25 +67,26 @@ class DjangoChatHistoryStore(BaseChatHistoryStore):
 
     def get_messages(self, limit: Optional[int] = None) -> list[Message]:
         """데이터베이스에서 메시지 목록을 가져옴"""
-        from .models import ChatMessage
 
         queryset = ChatMessage.objects.filter(session=self.session)
 
-        if limit is not None:
-            # 최근 limit개 메시지만 가져오기
-            queryset = queryset[max(0, queryset.count() - limit) :]
+        if limit:
+            queryset = reversed(queryset.order_by("-id")[:limit])
+        else:
+            queryset = queryset.order_by("id")
 
-        return [Message(role=msg.role, content=msg.content, created_at=msg.created_at) for msg in queryset]
+        return [
+            Message(role=chat_message.role, content=chat_message.content, created_at=chat_message.created_at)
+            for chat_message in queryset
+        ]
 
     def clear_history(self) -> None:
         """해당 세션의 모든 메시지를 삭제"""
-        from .models import ChatMessage
 
         ChatMessage.objects.filter(session=self.session).delete()
 
     def get_message_count(self) -> int:
         """세션의 총 메시지 수 반환"""
-        from .models import ChatMessage
 
         return ChatMessage.objects.filter(session=self.session).count()
 

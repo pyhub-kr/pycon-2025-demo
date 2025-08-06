@@ -1,10 +1,10 @@
 from django.contrib import admin
-from .models import ChatSession, ChatMessage
+from .models import ChatSession
 
 
 @admin.register(ChatSession)
 class ChatSessionAdmin(admin.ModelAdmin):
-    """채팅 세션 Admin"""
+    """채팅 세션 Admin (읽기 전용)"""
 
     list_display = [
         "id",
@@ -16,8 +16,12 @@ class ChatSessionAdmin(admin.ModelAdmin):
     ]
     list_filter = ["is_active", "model", "created_at"]
     search_fields = ["title", "instruction", "user__username"]
-    readonly_fields = ["created_at", "updated_at"]
     date_hierarchy = "created_at"
+    
+    # 모든 필드를 읽기 전용으로 설정
+    readonly_fields = ["user", "title", "is_active", "instruction", 
+                      "model", "temperature", "max_tokens", 
+                      "created_at", "updated_at"]
 
     fieldsets = (
         ("기본 정보", {"fields": ("user", "title", "is_active")}),
@@ -37,45 +41,21 @@ class ChatSessionAdmin(admin.ModelAdmin):
         return obj.title or f"Session #{obj.id}"
 
     title_display.short_description = "Title"
-
-
-@admin.register(ChatMessage)
-class ChatMessageAdmin(admin.ModelAdmin):
-    """채팅 메시지 Admin"""
-
-    list_display = [
-        "id",
-        "session",
-        "role",
-        "content_preview",
-        "created_at",
-    ]
-    list_filter = ["role", "created_at"]
-    search_fields = ["content", "session__title"]
-    readonly_fields = ["created_at"]
-    raw_id_fields = ["session"]
-    date_hierarchy = "created_at"
-
-    fieldsets = (
-        ("세션 정보", {"fields": ("session",)}),
-        ("메시지 정보", {"fields": ("role", "content")}),
-        (
-            "생성 시간",
-            {
-                "fields": ("created_at",),
-                "classes": ("collapse",),
-            },
-        ),
-    )
-
-    def content_preview(self, obj):
-        """내용 미리보기"""
-        return obj.content[:100] + "..." if len(obj.content) > 100 else obj.content
-
-    content_preview.short_description = "Content Preview"
+    
+    def has_add_permission(self, request):
+        """추가 권한 제거"""
+        return False
+    
+    def has_change_permission(self, request, obj=None):
+        """수정 권한 제거 (조회만 가능)"""
+        return True  # True를 반환해야 조회가 가능
+    
+    def has_delete_permission(self, request, obj=None):
+        """삭제 권한 제거"""
+        return False
 
 
 # Admin 사이트 커스터마이징
-admin.site.site_header = "채팅 히스토리 관리"
+admin.site.site_header = "채팅 히스토리 조회"
 admin.site.site_title = "Chat Admin"
-admin.site.index_title = "채팅 세션 및 메시지 관리"
+admin.site.index_title = "채팅 세션 조회"

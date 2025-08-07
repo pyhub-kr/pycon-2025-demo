@@ -1,0 +1,17 @@
+{% if message.role == "user" %}
+    <div class="flex justify-end" {% if message.dom_id %}id="{{ message.dom_id }}"{% endif %}
+         {% if hx_swap_oob %}hx-swap-oob="{{ hx_swap_oob }}"{% endif %}>
+        <div class="bg-blue-100 rounded-lg px-3 py-2 max-w-xs lg:max-w-md">
+            <span class="text-sm font-semibold text-blue-900">You</span>
+            <p class="text-gray-800">{{ message.content }}</p>
+        </div>
+    </div>
+{% elif message.role == "assistant" %}
+    <div class="flex justify-start" {% if message.dom_id %}id="{{ message.dom_id }}"{% endif %}
+         {% if hx_swap_oob %}hx-swap-oob="{{ hx_swap_oob }}"{% endif %}>
+        <div class="bg-gray-100 rounded-lg px-3 py-2 max-w-xs lg:max-w-md">
+            <span class="text-sm font-semibold text-gray-700">AI</span>
+            <p class="text-gray-800 whitespace-pre-wrap">{{ message.content }}</p>
+        </div>
+    </div>
+{% endif %}

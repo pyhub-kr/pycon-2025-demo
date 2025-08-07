@@ -1,0 +1,30 @@
+
+{% if not chat_response %}
+    {% include "roleplay/_message.html" with message=human_message %}
+    {% include "roleplay/_message.html" with message=ai_message %}
+{% else %}
+    {% include "roleplay/_message.html" with message=ai_message hx_swap_oob="true" %}
+
+    <div id="advice" hx-swap-oob="innerHTML">
+        <div class="mb-2">
+            <span class="font-semibold">토큰 사용량:</span>
+            입력 {{ chat_response.usage.input_tokens }}, 출력 {{ chat_response.usage.output_tokens }}
+        </div>
+        <div>
+            <h3 class="font-semibold mb-1">추천 표현:</h3>
+            <ul class="list-disc list-inside space-y-1">
+                {% for phrase in chat_response.suggested_phrases %}
+                    <li>{{ phrase }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endif %}
+
+{% if error_message %}
+    <div id="advice" hx-swap-oob="innerHTML">
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-800">
+            <span class="font-semibold">오류:</span> {{ error_message }}
+        </div>
+    </div>
+{% endif %}

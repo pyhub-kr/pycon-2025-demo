@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Optional, Literal, cast
+from uuid import uuid4
 
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageParam
@@ -64,6 +65,7 @@ class Message:
     content: str
     created_at: datetime = field(default_factory=datetime.now)
     usage: Optional[UsageInfo] = None  # Assistant 메시지인 경우 사용량 정보 포함
+    dom_id: str = field(default_factory=lambda: f"id_{uuid4().hex}")
 
 
 class BaseChatConfig(ABC):

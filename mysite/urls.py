@@ -8,4 +8,5 @@ urlpatterns = [
     path("accounts/", include("django.contrib.auth.urls")),
     path("admin/", admin.site.urls),
     path("roleplay/", include("roleplay.urls")),
+    path("todo/", include("todo.urls")),
 ]

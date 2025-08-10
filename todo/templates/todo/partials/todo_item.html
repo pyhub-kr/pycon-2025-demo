@@ -1,0 +1,33 @@
+<div id="todo-{{ todo.id }}" 
+     class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+    
+    <!-- Toggle Checkbox -->
+    <input type="checkbox" 
+           {% if todo.completed %}checked{% endif %}
+           hx-put="{% url 'todo:toggle' todo.id %}"
+           hx-target="#todo-{{ todo.id }}"
+           hx-swap="outerHTML"
+           class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer">
+    
+    <!-- Todo Title -->
+    <span class="flex-1 {% if todo.completed %}line-through text-gray-400{% else %}text-gray-700{% endif %}">
+        {{ todo.title }}
+    </span>
+    
+    <!-- Edit Button -->
+    <button hx-get="{% url 'todo:edit' todo.id %}"
+            hx-target="#todo-{{ todo.id }}"
+            hx-swap="outerHTML"
+            class="px-3 py-1 text-blue-500 hover:bg-blue-50 rounded transition-colors">
+        수정
+    </button>
+    
+    <!-- Delete Button -->
+    <button hx-delete="{% url 'todo:delete' todo.id %}"
+            hx-target="#todo-{{ todo.id }}"
+            hx-swap="outerHTML swap:200ms"
+            hx-confirm="정말 삭제하시겠습니까?"
+            class="px-3 py-1 text-red-500 hover:bg-red-50 rounded transition-colors">
+        삭제
+    </button>
+</div>

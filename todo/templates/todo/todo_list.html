@@ -1,0 +1,34 @@
+{% extends 'todo/base.html' %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-md p-6">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">📝 Todo List</h1>
+    
+    <!-- Add Todo Form -->
+    <form hx-post="{% url 'todo:add' %}"
+          hx-target="#todo-list"
+          hx-swap="afterbegin"
+          hx-on::after-request="this.reset()"
+          class="mb-6">
+        {% csrf_token %}
+        <div class="flex gap-2">
+            {{ form.title }}
+            <button type="submit"
+                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                추가
+            </button>
+        </div>
+    </form>
+    
+    <!-- Todo List -->
+    <div id="todo-list" class="space-y-2">
+        {% for todo in todos %}
+            {% include 'todo/partials/todo_item.html' %}
+        {% endfor %}
+    </div>
+    
+    {% if not todos %}
+    <p class="text-gray-500 text-center py-8">할 일이 없습니다. 새로운 할 일을 추가해보세요!</p>
+    {% endif %}
+</div>
+{% endblock %}

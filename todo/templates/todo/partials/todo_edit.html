@@ -1,0 +1,45 @@
+<div id="todo-{{ todo.id }}" 
+     class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+    
+    <form hx-put="{% url 'todo:update' todo.id %}"
+          hx-target="#todo-{{ todo.id }}"
+          hx-swap="outerHTML"
+          class="flex-1 flex items-center gap-3">
+        {% csrf_token %}
+        
+        <!-- Edit Input -->
+        <input type="text" 
+               name="title" 
+               value="{{ todo.title }}"
+               class="flex-1 px-3 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+               required
+               autofocus>
+        
+        <!-- Save Button -->
+        <button type="submit"
+                class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+            저장
+        </button>
+        
+        <!-- Cancel Button -->
+        <button type="button"
+                hx-get="{% url 'todo:cancel' todo.id %}"
+                hx-target="#todo-{{ todo.id }}"
+                hx-swap="outerHTML"
+                class="px-3 py-1 bg-gray-400 text-white rounded hover:bg-gray-500 transition-colors">
+            취소
+        </button>
+    </form>
+</div>
+
+<script>
+    // ESC 키로 취소
+    document.getElementById('todo-{{ todo.id }}').addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            htmx.ajax('GET', '{% url 'todo:cancel' todo.id %}', {
+                target: '#todo-{{ todo.id }}', 
+                swap: 'outerHTML'
+            });
+        }
+    });
+</script>

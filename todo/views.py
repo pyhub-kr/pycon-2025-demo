@@ -14,7 +14,7 @@ def add_todo(request):
     form = TodoForm(request.POST)
     if form.is_valid():
         todo = form.save()
-        return render(request, 'todo/partials/todo_item.html', {'todo': todo})
+        return render(request, 'todo/partials/todo_item_with_remove_empty.html', {'todo': todo})
     return HttpResponse('')
 
 @require_http_methods(['PUT'])
@@ -49,4 +49,10 @@ def update_todo(request, pk):
 def delete_todo(request, pk):
     todo = get_object_or_404(Todo, pk=pk)
     todo.delete()
+    
+    # Check if there are no todos left
+    if Todo.objects.count() == 0:
+        # Return the empty message
+        return render(request, 'todo/partials/empty_message.html')
+    
     return HttpResponse('')

@@ -25,10 +25,9 @@
         {% for todo in todos %}
             {% include 'todo/partials/todo_item.html' %}
         {% endfor %}
+        {% if not todos %}
+        <p id="empty-message" class="text-gray-500 text-center py-8">할 일이 없습니다. 새로운 할 일을 추가해보세요!</p>
+        {% endif %}
     </div>
-    
-    {% if not todos %}
-    <p class="text-gray-500 text-center py-8">할 일이 없습니다. 새로운 할 일을 추가해보세요!</p>
-    {% endif %}
 </div>
 {% endblock %}

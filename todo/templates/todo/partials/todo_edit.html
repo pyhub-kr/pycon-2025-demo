@@ -31,15 +31,3 @@
         </button>
     </form>
 </div>
-
-<script>
-    // ESC 키로 취소
-    document.getElementById('todo-{{ todo.id }}').addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            htmx.ajax('GET', '{% url 'todo:cancel' todo.id %}', {
-                target: '#todo-{{ todo.id }}', 
-                swap: 'outerHTML'
-            });
-        }
-    });
-</script>

@@ -6,6 +6,7 @@
     <title>프롬프트 관리 시스템</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="//unpkg.com/htmx.org@1.9.10"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     {% block extra-head %}{% endblock %}
 </head>
 <body class="bg-gray-100" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
@@ -13,5 +14,8 @@
         {% block content %}
         {% endblock %}
     </div>
+    
+    <!-- 모달 컨테이너 -->
+    <div id="modal-container"></div>
 </body>
 </html>

@@ -1,14 +1,14 @@
-<div id="modal-prompt-{{ prompt.id }}" 
-     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-     onclick="if(event.target === this) this.remove()">
+<div id="modal-prompt-{{ prompt.id }}"
+     @click="if($event.target === $el) { $el.remove() }"
+     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto m-4"
-         onclick="event.stopPropagation()">
+         @click.stop>
         <div class="flex justify-between items-start mb-4">
             <h2 class="text-2xl font-bold text-gray-800">
                 {% if prompt.is_favorite %}⭐{% endif %}
                 {{ prompt.title }}
             </h2>
-            <button onclick="this.closest('.fixed').remove()"
+            <button @click="$root.remove()"
                     class="text-gray-500 hover:text-gray-700">
                 ✕
             </button>
@@ -41,7 +41,9 @@
         {% endif %}
         
         <div class="flex gap-2">
-            <button onclick="navigator.clipboard.writeText(document.querySelector('pre').textContent); this.textContent='복사됨!'; setTimeout(()=>this.textContent='📋 복사하기', 2000)"
+            <button x-data="{ copied: false }"
+                    @click="navigator.clipboard.writeText($el.closest('.bg-white').querySelector('pre').textContent); copied = true; setTimeout(() => copied = false, 2000)"
+                    x-text="copied ? '복사됨!' : '📋 복사하기'"
                     class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
                 📋 복사하기
             </button>
@@ -49,7 +51,7 @@
                class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
                 ✏️ 수정하기
             </a>
-            <button onclick="this.closest('.fixed').remove()"
+            <button @click="$root.remove()"
                     class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors">
                 닫기
             </button>

@@ -10,4 +10,5 @@ urlpatterns = [
     path("roleplay/", include("roleplay.urls")),
     path("todo/", include("todo.urls")),
     path("prompts/", include("prompts.urls")),
+    path("melon/", include("melon.urls")),
 ]

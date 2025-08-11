@@ -1,0 +1,50 @@
+{% extends 'melon/base.html' %}
+
+{% block title %}Melon TOP 100{% endblock %}
+
+{% block content %}
+<div x-data="{ showScrollTop: false }" @scroll.window="showScrollTop = window.pageYOffset > 300">
+    <!-- 페이지 헤더 -->
+    <div class="mb-8">
+        <h2 class="text-3xl font-bold text-gray-800 mb-2">TOP 100</h2>
+        <p class="text-gray-600">실시간 인기 음원 차트</p>
+    </div>
+    
+    <!-- 차트 컨테이너 -->
+    <div id="song-list" class="space-y-4">
+        {% include 'melon/partials/song_list.html' %}
+    </div>
+    
+    <!-- Scroll to Top 버튼 -->
+    <button
+        x-show="showScrollTop"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 transform translate-y-2"
+        x-transition:enter-end="opacity-1 transform translate-y-0"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-1"
+        x-transition:leave-end="opacity-0"
+        @click="window.scrollTo({ top: 0, behavior: 'smooth' })"
+        class="fixed bottom-8 right-8 bg-melon-green text-white p-3 rounded-full shadow-lg hover:bg-green-600 transition-colors"
+        style="display: none;"
+        x-cloak
+    >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+        </svg>
+    </button>
+</div>
+
+<script>
+    // HTMX 이벤트 후 페이드인 효과
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        if (evt.detail.target.id === 'song-list' || evt.detail.target.closest('#song-list')) {
+            evt.detail.target.querySelectorAll('.song-card').forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('fade-in');
+                }, index * 50);
+            });
+        }
+    });
+</script>
+{% endblock %}

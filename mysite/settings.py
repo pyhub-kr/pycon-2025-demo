@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "roleplay",
     "todo",
     "prompts",
+    "melon",
 ]
 
 MIDDLEWARE = [

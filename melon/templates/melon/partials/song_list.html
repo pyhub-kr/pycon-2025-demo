@@ -1,0 +1,8 @@
+{% for song in page_obj %}
+    {% include 'melon/partials/song_card.html' with song=song %}
+{% endfor %}
+
+<!-- 페이지네이션 - 처음 로드시에만 표시 -->
+{% if page_obj.has_next %}
+    {% include 'melon/partials/load_more_button.html' with page_obj=page_obj %}
+{% endif %}

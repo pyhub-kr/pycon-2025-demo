@@ -3,7 +3,6 @@ Django-independent core classes for the roleplay application.
 This module can be used with any Python framework.
 """
 
-import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -11,6 +10,7 @@ from enum import Enum
 from typing import Optional, Literal, cast
 from uuid import uuid4
 
+from django.conf import settings
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageParam
 from pydantic import BaseModel
@@ -151,7 +151,7 @@ class ChatService:
         self.verbose = verbose
 
         if api_key is None:
-            self.api_key = os.environ.get("OPENAI_API_KEY", None)
+            self.api_key = settings.OPENAI_API_KEY
         else:
             self.api_key = api_key
 

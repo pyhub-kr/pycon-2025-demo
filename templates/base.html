@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}파이콘 2025{% endblock %}</title>
+    <script src="//cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/sse.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/ws.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    {% block extra-head %}{% endblock %}
+</head>
+<body class="min-h-screen flex flex-col bg-gray-50">
+    {% csrf_token %}
+    
+    {# Header #}
+    <header class="bg-blue-600 text-white py-4 shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold">
+                    <a href="/" class="hover:text-blue-200">
+                        파이콘 2025 Dashboard
+                    </a>
+                </h1>
+                <nav class="space-x-4">
+                    {% if user.is_authenticated %}
+                        <span class="text-sm">{{ user.username }}</span>
+                        <a href="{% url 'logout' %}" class="text-sm hover:text-blue-200">로그아웃</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="text-sm hover:text-blue-200">로그인</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    {# Main Content #}
+    <main class="flex-grow container mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    {# Footer #}
+    <footer class="bg-gray-800 text-white py-4 mt-auto">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2025. 이진석</p>
+        </div>
+    </footer>
+
+    {# HTMX configuration #}
+    <script>
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            evt.detail.headers['X-CSRFToken'] = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        });
+    </script>
+
+    {# extra script #}
+    {% block extra-script %}{% endblock %}
+</body>
+</html>

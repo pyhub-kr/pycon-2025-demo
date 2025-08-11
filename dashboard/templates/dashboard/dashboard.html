@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold mb-8">Dashboard</h1>
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- 날씨 위젯 -->
+    <div id="weather-container">
+      <div hx-get="{% url 'widgets:weather' %}?delay=1"
+           hx-trigger="load delay:100ms"
+           hx-swap="innerHTML"
+           hx-indicator="#initial-weather-loading">
+        
+        <!-- 초기 로딩 인디케이터 -->
+        <div id="initial-weather-loading" class="htmx-indicator">
+          <div class="bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+            <div class="flex flex-col items-center justify-center h-48">
+              <div class="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent mb-3"></div>
+              <span class="text-sm font-medium">날씨 정보 로딩 중...</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 스켈레톤 UI (JavaScript 비활성화 시 표시) -->
+        <div class="bg-gray-200 rounded-xl p-6 animate-pulse">
+          <div class="h-4 bg-gray-300 rounded w-1/2 mb-4"></div>
+          <div class="h-8 bg-gray-300 rounded w-3/4 mb-4"></div>
+          <div class="h-4 bg-gray-300 rounded w-full"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 다른 위젯들을 위한 공간 -->
+    <div class="bg-white rounded-xl p-6 shadow-lg">
+      <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+      <div class="space-y-2">
+        <a href="{% url 'roleplay:chatsession_list' %}" class="block text-blue-600 hover:text-blue-800">
+          💬 Roleplay Chat
+        </a>
+        <a href="{% url 'todo:list' %}" class="block text-blue-600 hover:text-blue-800">
+          ✅ Todo List
+        </a>
+        <a href="{% url 'prompts:list' %}" class="block text-blue-600 hover:text-blue-800">
+          📝 Prompts
+        </a>
+        <a href="{% url 'melon:song_list' %}" class="block text-blue-600 hover:text-blue-800">
+          🎵 Melon Chart
+        </a>
+      </div>
+    </div>
+    
+    <!-- 활동 요약 위젯 -->
+    <div class="bg-white rounded-xl p-6 shadow-lg">
+      <h3 class="text-lg font-semibold mb-4">Recent Activity</h3>
+      <p class="text-gray-600">No recent activity</p>
+    </div>
+  </div>
+</div>
+
+<!-- 위치 설정 모달 -->
+<div id="weather-settings-modal"></div>
+
+<style>
+  /* HTMX 인디케이터 스타일 */
+  .htmx-indicator {
+    display: none;
+  }
+  
+  .htmx-request .htmx-indicator {
+    display: flex !important;
+  }
+  
+  /* 초기 로딩 시 스켈레톤 UI 숨김 */
+  .htmx-request ~ div.animate-pulse {
+    display: none;
+  }
+</style>
+
+<script>
+  function showLocationSettings() {
+    // 위치 설정 모달 표시 로직
+    alert('위치 설정 기능은 준비 중입니다.');
+  }
+</script>
+{% endblock %}

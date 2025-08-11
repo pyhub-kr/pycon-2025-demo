@@ -63,10 +63,14 @@ def prompt_detail(request, pk):
     """프롬프트 상세 보기"""
     prompt = get_object_or_404(Prompt, pk=pk)
     prompt.increment_usage()  # 사용 횟수 증가
-    
-    return render(request, "prompts/partials/prompt_detail.html", {
-        "prompt": prompt,
-    })
+
+    return render(
+        request,
+        "prompts/partials/prompt_detail.html",
+        {
+            "prompt": prompt,
+        },
+    )
 
 
 def toggle_favorite(request, pk):

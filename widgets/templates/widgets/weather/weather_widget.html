@@ -1,0 +1,105 @@
+<div id="weather-widget" 
+     class="bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg relative"
+     hx-get="{% url 'widgets:weather' %}?delay=1"
+     hx-vals='js:{"_": Date.now()}'
+     hx-trigger="every 10s"
+     hx-swap="outerHTML"
+     hx-indicator="#weather-indicator">
+  
+  <!-- 헤더: 위치와 업데이트 시간 -->
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-lg font-semibold">서울</h3>
+    <span class="text-sm opacity-80">{{ weather.updated_at|date:"H:i" }}</span>
+  </div>
+  
+  <!-- 현재 날씨 정보 -->
+  <div class="grid grid-cols-2 gap-4 mb-6">
+    <!-- 온도와 날씨 상태 -->
+    <div>
+      <div class="flex items-center">
+        <div class="text-4xl font-bold">{{ weather.temp }}°C</div>
+        {% if weather.icon == '01d' %}
+          <span class="text-3xl ml-3">☀️</span>
+        {% elif weather.icon == '01n' %}
+          <span class="text-3xl ml-3">🌙</span>
+        {% elif weather.icon == '02d' or weather.icon == '02n' %}
+          <span class="text-3xl ml-3">⛅</span>
+        {% elif weather.icon == '03d' or weather.icon == '03n' or weather.icon == '04d' or weather.icon == '04n' %}
+          <span class="text-3xl ml-3">☁️</span>
+        {% elif weather.icon == '09d' or weather.icon == '09n' or weather.icon == '10d' or weather.icon == '10n' %}
+          <span class="text-3xl ml-3">🌧️</span>
+        {% elif weather.icon == '11d' or weather.icon == '11n' %}
+          <span class="text-3xl ml-3">⛈️</span>
+        {% elif weather.icon == '13d' or weather.icon == '13n' %}
+          <span class="text-3xl ml-3">❄️</span>
+        {% elif weather.icon == '50d' or weather.icon == '50n' %}
+          <span class="text-3xl ml-3">🌫️</span>
+        {% else %}
+          <span class="text-3xl ml-3">🌡️</span>
+        {% endif %}
+      </div>
+      <div class="text-sm mt-2 opacity-90">{{ weather.description }}</div>
+      <div class="text-xs mt-1 opacity-80">체감 온도: {{ weather.feels_like }}°C</div>
+    </div>
+    
+    <!-- 날씨 상세 정보 -->
+    <div class="space-y-2 text-sm">
+      <div class="flex justify-between">
+        <span class="opacity-80">습도</span>
+        <span class="font-semibold">{{ weather.humidity }}%</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="opacity-80">바람</span>
+        <span class="font-semibold">{{ weather.wind_speed }} m/s</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="opacity-80">최고/최저</span>
+        <span class="font-semibold">{{ weather.temp_max }}° / {{ weather.temp_min }}°</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 일출/일몰 시간 -->
+  <div class="flex justify-between text-sm border-t border-white/20 pt-4">
+    <div class="flex items-center">
+      <span class="mr-2">일출</span>
+      <span class="font-semibold">{{ weather.sunrise|date:"H:i" }}</span>
+    </div>
+    <div class="flex items-center">
+      <span class="mr-2">일몰</span>
+      <span class="font-semibold">{{ weather.sunset|date:"H:i" }}</span>
+    </div>
+  </div>
+  
+  <!-- 개선된 로딩 인디케이터 -->
+  <div id="weather-indicator" class="htmx-indicator absolute inset-0 bg-blue-600/90 rounded-xl flex flex-col items-center justify-center backdrop-blur-sm">
+    <div class="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent mb-3"></div>
+    <span class="text-white text-sm font-medium">날씨 정보 업데이트 중...</span>
+  </div>
+  
+  {% if weather.is_default %}
+  <!-- 기본 데이터 안내 -->
+  <div class="mt-2 text-xs opacity-70 text-center">
+    ℹ️ 샘플 데이터입니다
+  </div>
+  {% endif %}
+</div>
+
+<style>
+  /* HTMX 인디케이터 기본 스타일 */
+  .htmx-indicator {
+    display: none;
+  }
+  
+  /* 요청 중일 때만 표시 */
+  .htmx-request .htmx-indicator,
+  .htmx-request.htmx-indicator {
+    display: flex !important;
+  }
+  
+  /* 로딩 중 콘텐츠 약간 흐림 효과 */
+  #weather-widget.htmx-request > div:not(.htmx-indicator) {
+    opacity: 0.3;
+    transition: opacity 0.3s ease;
+  }
+</style>

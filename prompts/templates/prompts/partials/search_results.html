@@ -15,6 +15,16 @@
     {% endif %}
 
     {% if prompts %}
+        <!-- 사용 안내 (첫 페이지에서만 표시) -->
+        {% if not query and not selected_category %}
+        <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+            💡 <strong>사용 방법:</strong> 
+            <span>제목을 클릭하면 상세 내용을 볼 수 있고</span>, 
+            <span>✏️ 버튼으로 수정</span>, 
+            <span>⭐ 버튼으로 즐겨찾기를 할 수 있습니다.</span>
+        </div>
+        {% endif %}
+        
         <!-- 프롬프트 목록 -->
         {% for prompt in prompts %}
             {% include 'prompts/partials/prompt_item.html' %}

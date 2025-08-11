@@ -3,10 +3,16 @@
     
     <div class="flex items-start justify-between">
         <div class="flex-1">
-            <!-- 제목 -->
+            <!-- 제목 (클릭 가능) -->
             <h3 class="text-lg font-semibold text-gray-800 mb-1">
-                {% if prompt.is_favorite %}⭐{% endif %}
-                {{ prompt.title }}
+                <a href="#" 
+                   hx-get="{% url 'prompts:detail' prompt.id %}"
+                   hx-target="#prompt-detail"
+                   hx-swap="innerHTML"
+                   class="hover:text-blue-600 transition-colors">
+                    {% if prompt.is_favorite %}⭐{% endif %}
+                    {{ prompt.title }}
+                </a>
             </h3>
             
             <!-- 메타 정보 -->
@@ -49,13 +55,11 @@
                 {% if prompt.is_favorite %}★{% else %}☆{% endif %}
             </button>
             
-            <button hx-get="{% url 'prompts:detail' prompt.id %}"
-                    hx-target="#prompt-detail"
-                    hx-swap="innerHTML"
-                    class="p-2 text-blue-500 hover:bg-blue-50 rounded transition-colors"
-                    title="상세보기">
-                👁️
-            </button>
+            <a href="{% url 'prompts:update' prompt.id %}"
+               class="p-2 text-green-500 hover:bg-green-50 rounded transition-colors"
+               title="수정">
+                ✏️
+            </a>
         </div>
     </div>
 </div>

@@ -1,0 +1,305 @@
+from django.core.management.base import BaseCommand
+from prompts.models import Prompt
+
+
+class Command(BaseCommand):
+    help = "샘플 프롬프트 데이터 생성"
+
+    def handle(self, *args, **kwargs):
+        sample_prompts = [
+            {
+                "title": "Python 코드 리뷰 요청",
+                "content": "다음 Python 코드를 검토하고 개선점을 제안해주세요:\n\n[코드]\n\n특히 다음 사항들을 중점적으로 봐주세요:\n1. 코드 가독성\n2. 성능 최적화\n3. 에러 처리\n4. PEP 8 준수",
+                "category": "coding",
+                "tags": ["python", "코드리뷰", "최적화"],
+                "usage_count": 245,
+                "is_favorite": True,
+            },
+            {
+                "title": "블로그 포스트 작성 도우미",
+                "content": "다음 주제로 블로그 포스트를 작성해주세요:\n\n주제: [주제]\n대상 독자: [독자층]\n분량: 약 [X]자\n톤앤매너: [공식적/친근한/전문적]\n\n포함할 내용:\n- 도입부\n- 본문 (3-4개 섹션)\n- 결론\n- CTA",
+                "category": "writing",
+                "tags": ["블로그", "글쓰기", "콘텐츠"],
+                "usage_count": 189,
+                "is_favorite": True,
+            },
+            {
+                "title": "SQL 쿼리 최적화",
+                "content": "다음 SQL 쿼리를 분석하고 최적화해주세요:\n\n[쿼리]\n\n데이터베이스: [MySQL/PostgreSQL/SQLite]\n테이블 크기: 약 [X]개 행\n\n최적화 목표:\n- 실행 시간 단축\n- 인덱스 활용\n- 조인 최적화",
+                "category": "coding",
+                "tags": ["sql", "데이터베이스", "최적화"],
+                "usage_count": 156,
+                "is_favorite": False,
+            },
+            {
+                "title": "비즈니스 이메일 작성",
+                "content": "다음 상황에 맞는 비즈니스 이메일을 작성해주세요:\n\n상황: [상황 설명]\n수신자: [직책/관계]\n목적: [이메일 목적]\n톤: [공식적/준공식적]\n\n포함사항:\n- 인사말\n- 본문\n- 액션 아이템\n- 마무리 인사",
+                "category": "business",
+                "tags": ["이메일", "비즈니스", "커뮤니케이션"],
+                "usage_count": 203,
+                "is_favorite": True,
+            },
+            {
+                "title": "React 컴포넌트 생성",
+                "content": "다음 요구사항에 맞는 React 컴포넌트를 작성해주세요:\n\n컴포넌트명: [이름]\n기능: [설명]\nProps: [prop 목록]\n상태관리: [useState/useReducer/Redux]\n\n추가 요구사항:\n- TypeScript 사용\n- 스타일링: [CSS Modules/Styled Components/Tailwind]\n- 테스트 코드 포함",
+                "category": "coding",
+                "tags": ["react", "javascript", "frontend"],
+                "usage_count": 178,
+                "is_favorite": False,
+            },
+            {
+                "title": "데이터 분석 리포트",
+                "content": "다음 데이터를 분석하고 인사이트를 도출해주세요:\n\n데이터: [데이터 설명 또는 CSV]\n분석 목적: [목적]\n\n분석 항목:\n1. 기초 통계량\n2. 트렌드 분석\n3. 상관관계\n4. 이상치 탐지\n5. 시각화 제안\n6. 액션 아이템",
+                "category": "analysis",
+                "tags": ["데이터분석", "통계", "시각화"],
+                "usage_count": 134,
+                "is_favorite": False,
+            },
+            {
+                "title": "창의적인 스토리 구성",
+                "content": "다음 설정으로 짧은 이야기를 만들어주세요:\n\n장르: [장르]\n배경: [시대/장소]\n주인공: [캐릭터 설명]\n갈등: [주요 갈등]\n분량: [X]자\n\n포함 요소:\n- 흥미로운 도입\n- 갈등의 전개\n- 클라이맥스\n- 해결",
+                "category": "creative",
+                "tags": ["스토리", "창작", "글쓰기"],
+                "usage_count": 98,
+                "is_favorite": False,
+            },
+            {
+                "title": "API 문서 작성",
+                "content": "다음 API에 대한 문서를 작성해주세요:\n\nEndpoint: [URL]\nMethod: [GET/POST/PUT/DELETE]\n용도: [설명]\n\n문서 포함 사항:\n- 요청 파라미터\n- 요청 본문 예제\n- 응답 형식\n- 응답 코드\n- 에러 처리\n- 사용 예제 (curl, Python, JavaScript)",
+                "category": "coding",
+                "tags": ["api", "문서화", "rest"],
+                "usage_count": 167,
+                "is_favorite": True,
+            },
+            {
+                "title": "학습 계획 수립",
+                "content": "다음 주제에 대한 학습 계획을 세워주세요:\n\n학습 주제: [주제]\n현재 수준: [초급/중급/고급]\n목표: [학습 목표]\n기간: [X주/개월]\n하루 학습 시간: [X시간]\n\n계획에 포함:\n- 주차별 목표\n- 추천 자료\n- 실습 프로젝트\n- 평가 방법",
+                "category": "education",
+                "tags": ["학습", "교육", "계획"],
+                "usage_count": 145,
+                "is_favorite": False,
+            },
+            {
+                "title": "프레젠테이션 구성",
+                "content": "다음 주제로 프레젠테이션을 구성해주세요:\n\n주제: [주제]\n대상: [청중]\n시간: [X분]\n목적: [설득/정보전달/교육]\n\n슬라이드 구성:\n1. 제목\n2. 목차\n3. 도입 (문제 제기)\n4. 본론 (3-4개 섹션)\n5. 결론\n6. Q&A\n\n각 슬라이드별 핵심 메시지와 시각 자료 제안",
+                "category": "business",
+                "tags": ["프레젠테이션", "ppt", "발표"],
+                "usage_count": 112,
+                "is_favorite": False,
+            },
+            {
+                "title": "Django 모델 설계",
+                "content": "다음 요구사항에 맞는 Django 모델을 설계해주세요:\n\n서비스: [서비스 설명]\n주요 기능: [기능 목록]\n\n모델 설계:\n- 필요한 모델들\n- 각 필드와 타입\n- 관계 설정 (1:1, 1:N, M:N)\n- 인덱스 설정\n- 메서드 제안\n- Admin 설정",
+                "category": "coding",
+                "tags": ["django", "python", "backend"],
+                "usage_count": 189,
+                "is_favorite": True,
+            },
+            {
+                "title": "마케팅 카피 작성",
+                "content": "다음 제품/서비스에 대한 마케팅 카피를 작성해주세요:\n\n제품/서비스: [설명]\n타겟 고객: [고객층]\n핵심 가치: [USP]\n톤앤매너: [브랜드 톤]\n\n필요한 카피:\n- 헤드라인\n- 서브 헤드라인\n- 본문 (100자)\n- CTA 버튼 텍스트\n- 해시태그 5개",
+                "category": "business",
+                "tags": ["마케팅", "카피라이팅", "광고"],
+                "usage_count": 156,
+                "is_favorite": False,
+            },
+            # Business 카테고리 추가 (2개)
+            {
+                "title": "제안서 작성 도우미",
+                "content": "다음 정보로 비즈니스 제안서를 작성해주세요:\n\n프로젝트: [프로젝트명]\n클라이언트: [회사/부서]\n목적: [제안 목적]\n예산: [예산 범위]\n기간: [프로젝트 기간]\n\n제안서 구성:\n1. 개요\n2. 문제 정의\n3. 솔루션 제안\n4. 실행 계획\n5. 예상 효과\n6. 비용 및 일정\n7. 팀 구성",
+                "category": "business",
+                "tags": ["제안서", "비즈니스", "기획"],
+                "usage_count": 142,
+                "is_favorite": False,
+            },
+            {
+                "title": "비즈니스 보고서 템플릿",
+                "content": "다음 내용으로 비즈니스 보고서를 작성해주세요:\n\n보고서 유형: [월간/분기/연간]\n부서: [부서명]\n기간: [보고 기간]\n\n포함 내용:\n- 핵심 성과 지표 (KPI)\n- 주요 성과\n- 문제점 및 개선사항\n- 다음 기간 계획\n- 리스크 및 대응방안\n- 제언사항",
+                "category": "business",
+                "tags": ["보고서", "KPI", "성과관리"],
+                "usage_count": 128,
+                "is_favorite": True,
+            },
+            # Writing 카테고리 추가 (4개)
+            {
+                "title": "보도자료 작성",
+                "content": "다음 정보로 보도자료를 작성해주세요:\n\n제목: [뉴스 제목]\n회사: [회사명]\n발표 내용: [주요 내용]\n인용문: [대표/담당자 코멘트]\n\n보도자료 구성:\n- 헤드라인\n- 리드문 (핵심 내용)\n- 본문 (상세 설명)\n- 회사 소개\n- 문의처",
+                "category": "writing",
+                "tags": ["PR", "보도자료", "언론"],
+                "usage_count": 95,
+                "is_favorite": False,
+            },
+            {
+                "title": "제품 리뷰 작성",
+                "content": "다음 제품에 대한 상세 리뷰를 작성해주세요:\n\n제품명: [제품]\n카테고리: [제품 카테고리]\n사용 기간: [X개월]\n\n리뷰 포함 사항:\n- 제품 소개\n- 장점 (3-5개)\n- 단점 (2-3개)\n- 사용 경험\n- 비교 제품\n- 추천 대상\n- 총평 및 평점",
+                "category": "writing",
+                "tags": ["리뷰", "제품평가", "콘텐츠"],
+                "usage_count": 87,
+                "is_favorite": False,
+            },
+            {
+                "title": "SNS 콘텐츠 기획",
+                "content": "다음 정보로 SNS 콘텐츠를 기획해주세요:\n\n플랫폼: [인스타그램/페이스북/링크드인/트위터]\n목적: [브랜딩/판매/인게이지먼트]\n타겟: [타겟 오디언스]\n기간: [캠페인 기간]\n\n콘텐츠 구성:\n- 포스팅 주제 (5개)\n- 해시태그 전략\n- 포스팅 시간대\n- 비주얼 컨셉\n- CTA 메시지",
+                "category": "writing",
+                "tags": ["SNS", "소셜미디어", "마케팅"],
+                "usage_count": 163,
+                "is_favorite": True,
+            },
+            {
+                "title": "기술 문서 작성",
+                "content": "다음 정보로 기술 문서를 작성해주세요:\n\n제품/기능: [명칭]\n대상 독자: [개발자/사용자/관리자]\n문서 유형: [설치 가이드/API 문서/사용자 매뉴얼]\n\n문서 구성:\n- 개요\n- 사전 요구사항\n- 설치/설정 방법\n- 주요 기능 설명\n- 예제 코드/사용법\n- 문제 해결\n- FAQ",
+                "category": "writing",
+                "tags": ["문서화", "기술문서", "매뉴얼"],
+                "usage_count": 121,
+                "is_favorite": False,
+            },
+            # Analysis 카테고리 추가 (4개)
+            {
+                "title": "경쟁사 분석 프레임워크",
+                "content": "다음 정보로 경쟁사 분석을 수행해주세요:\n\n우리 회사: [회사명]\n경쟁사: [경쟁사 목록]\n분석 영역: [제품/서비스/마케팅/가격]\n\n분석 항목:\n- 시장 포지션\n- 강점/약점 비교\n- 제품/서비스 차별점\n- 가격 전략\n- 마케팅 채널\n- 고객 세그먼트\n- 시사점 및 대응 전략",
+                "category": "analysis",
+                "tags": ["경쟁분석", "시장조사", "전략"],
+                "usage_count": 108,
+                "is_favorite": True,
+            },
+            {
+                "title": "SWOT 분석 도우미",
+                "content": "다음 대상에 대한 SWOT 분석을 수행해주세요:\n\n분석 대상: [회사/제품/프로젝트]\n목적: [전략 수립/의사결정]\n\nSWOT 매트릭스:\n- Strengths (강점): 내부 긍정 요인\n- Weaknesses (약점): 내부 부정 요인\n- Opportunities (기회): 외부 긍정 요인\n- Threats (위협): 외부 부정 요인\n\n전략 도출:\n- SO 전략 (강점-기회)\n- WO 전략 (약점-기회)\n- ST 전략 (강점-위협)\n- WT 전략 (약점-위협)",
+                "category": "analysis",
+                "tags": ["SWOT", "전략분석", "기획"],
+                "usage_count": 176,
+                "is_favorite": False,
+            },
+            {
+                "title": "사용자 행동 패턴 분석",
+                "content": "다음 데이터로 사용자 행동을 분석해주세요:\n\n서비스: [서비스명]\n분석 기간: [기간]\n주요 지표: [DAU/MAU/Retention/Conversion]\n\n분석 내용:\n- 사용자 세그먼트별 특징\n- 주요 행동 패턴\n- 이탈 포인트 분석\n- 전환 퍼널 분석\n- 코호트 분석\n- 개선 제안사항",
+                "category": "analysis",
+                "tags": ["사용자분석", "UX", "데이터분석"],
+                "usage_count": 142,
+                "is_favorite": False,
+            },
+            {
+                "title": "시장 조사 보고서",
+                "content": "다음 주제에 대한 시장 조사 보고서를 작성해주세요:\n\n산업: [산업 분야]\n조사 목적: [목적]\n지역: [대상 지역]\n\n보고서 구성:\n- 시장 규모 및 성장률\n- 주요 플레이어\n- 고객 니즈 및 트렌드\n- 진입 장벽\n- 규제 환경\n- 기회 및 위험 요소\n- 시장 전망",
+                "category": "analysis",
+                "tags": ["시장조사", "리서치", "트렌드"],
+                "usage_count": 93,
+                "is_favorite": False,
+            },
+            # Creative 카테고리 추가 (4개)
+            {
+                "title": "브랜드 네이밍 생성기",
+                "content": "다음 정보로 브랜드명을 제안해주세요:\n\n사업 분야: [분야]\n타겟 고객: [고객층]\n브랜드 가치: [핵심 가치]\n선호 스타일: [모던/클래식/미니멀/독특한]\n\n네이밍 제안:\n- 브랜드명 10개\n- 각 이름의 의미\n- 장단점 분석\n- 도메인 가용성 체크\n- 상표 검색 필요성",
+                "category": "creative",
+                "tags": ["브랜딩", "네이밍", "마케팅"],
+                "usage_count": 124,
+                "is_favorite": False,
+            },
+            {
+                "title": "광고 슬로건 제작",
+                "content": "다음 정보로 광고 슬로건을 만들어주세요:\n\n브랜드: [브랜드명]\n제품/서비스: [설명]\n핵심 메시지: [전달하고자 하는 메시지]\n톤앤매너: [감성적/이성적/유머러스]\n\n슬로건 제안:\n- 메인 슬로건 5개\n- 서브 카피 3개\n- 캠페인 해시태그\n- 적용 예시",
+                "category": "creative",
+                "tags": ["슬로건", "광고", "카피"],
+                "usage_count": 98,
+                "is_favorite": True,
+            },
+            {
+                "title": "시나리오/대본 작성",
+                "content": "다음 정보로 시나리오를 작성해주세요:\n\n형식: [광고/유튜브/드라마/영화]\n길이: [X분]\n장르: [장르]\n주제: [핵심 주제]\n등장인물: [인물 설정]\n\n시나리오 구성:\n- 시놉시스\n- 씬 구성\n- 대사\n- 지문\n- 음향/음악 큐",
+                "category": "creative",
+                "tags": ["시나리오", "대본", "스토리"],
+                "usage_count": 76,
+                "is_favorite": False,
+            },
+            {
+                "title": "캐릭터 설정 개발",
+                "content": "다음 정보로 캐릭터를 개발해주세요:\n\n용도: [게임/소설/웹툰/애니메이션]\n장르: [장르]\n역할: [주인공/조연/악역]\n\n캐릭터 설정:\n- 기본 정보 (이름, 나이, 성별)\n- 외모 묘사\n- 성격 및 특징\n- 배경 스토리\n- 능력/스킬\n- 관계도\n- 성장 아크",
+                "category": "creative",
+                "tags": ["캐릭터", "설정", "창작"],
+                "usage_count": 89,
+                "is_favorite": False,
+            },
+            # Education 카테고리 추가 (4개)
+            {
+                "title": "강의 계획서 작성",
+                "content": "다음 정보로 강의 계획서를 작성해주세요:\n\n과목명: [과목]\n대상: [학생 수준]\n기간: [X주]\n시간: [주당 X시간]\n\n계획서 구성:\n- 강의 목표\n- 주차별 학습 내용\n- 교재 및 참고자료\n- 평가 방법\n- 과제 계획\n- 수업 방식",
+                "category": "education",
+                "tags": ["강의", "교육", "커리큘럼"],
+                "usage_count": 134,
+                "is_favorite": False,
+            },
+            {
+                "title": "퀴즈/시험 문제 생성",
+                "content": "다음 정보로 평가 문제를 생성해주세요:\n\n과목: [과목명]\n범위: [학습 범위]\n난이도: [상/중/하]\n문제 수: [X개]\n유형: [객관식/주관식/서술형]\n\n문제 구성:\n- 개념 확인 문제\n- 응용 문제\n- 문제 해결 문제\n- 정답 및 해설\n- 배점 기준",
+                "category": "education",
+                "tags": ["평가", "시험", "퀴즈"],
+                "usage_count": 112,
+                "is_favorite": True,
+            },
+            {
+                "title": "온라인 튜토리얼 구성",
+                "content": "다음 주제로 온라인 튜토리얼을 구성해주세요:\n\n주제: [학습 주제]\n대상: [초급/중급/고급]\n형식: [동영상/텍스트/인터랙티브]\n길이: [X분/X페이지]\n\n튜토리얼 구성:\n- 학습 목표\n- 사전 지식\n- 단계별 설명\n- 실습 예제\n- 연습 문제\n- 추가 학습 자료",
+                "category": "education",
+                "tags": ["튜토리얼", "온라인교육", "e러닝"],
+                "usage_count": 98,
+                "is_favorite": False,
+            },
+            {
+                "title": "워크숍 프로그램 설계",
+                "content": "다음 정보로 워크숍 프로그램을 설계해주세요:\n\n주제: [워크숍 주제]\n참가자: [인원 및 대상]\n시간: [X시간/X일]\n목적: [워크숍 목적]\n\n프로그램 구성:\n- 아이스브레이킹\n- 이론 세션\n- 실습 활동\n- 그룹 토론\n- 발표 및 피드백\n- 액션 플랜",
+                "category": "education",
+                "tags": ["워크숍", "교육프로그램", "팀빌딩"],
+                "usage_count": 87,
+                "is_favorite": False,
+            },
+            # Other 카테고리 추가 (5개)
+            {
+                "title": "일정 관리 최적화",
+                "content": "다음 정보로 일정을 최적화해주세요:\n\n기간: [일/주/월]\n우선순위 업무: [업무 목록]\n회의: [회의 일정]\n마감일: [마감 목록]\n\n일정 구성:\n- 시간별 스케줄\n- 우선순위 배치\n- 버퍼 시간\n- 집중 시간 블록\n- 일일/주간 체크리스트",
+                "category": "other",
+                "tags": ["일정관리", "생산성", "계획"],
+                "usage_count": 156,
+                "is_favorite": True,
+            },
+            {
+                "title": "회의록 자동 정리",
+                "content": "다음 회의 내용을 정리해주세요:\n\n회의명: [회의 제목]\n일시: [날짜 및 시간]\n참석자: [참석자 명단]\n회의 내용: [녹취록 또는 메모]\n\n회의록 구성:\n- 회의 개요\n- 주요 논의사항\n- 결정사항\n- 액션 아이템 (담당자, 기한)\n- 다음 회의 일정",
+                "category": "other",
+                "tags": ["회의록", "문서정리", "업무"],
+                "usage_count": 143,
+                "is_favorite": False,
+            },
+            {
+                "title": "다국어 번역 도우미",
+                "content": "다음 텍스트를 번역해주세요:\n\n원문 언어: [언어]\n번역 언어: [대상 언어]\n텍스트 유형: [비즈니스/기술/일상/문학]\n원문: [번역할 텍스트]\n\n번역 요구사항:\n- 자연스러운 번역\n- 문화적 맥락 고려\n- 전문 용어 처리\n- 톤앤매너 유지",
+                "category": "other",
+                "tags": ["번역", "다국어", "언어"],
+                "usage_count": 189,
+                "is_favorite": False,
+            },
+            {
+                "title": "레시피 변환 계산기",
+                "content": "다음 레시피를 변환해주세요:\n\n원본 레시피: [레시피명]\n원본 인분: [X인분]\n변환 인분: [Y인분]\n재료 목록: [재료 및 양]\n\n변환 내용:\n- 재료 양 재계산\n- 조리 시간 조정\n- 조리 도구 크기 추천\n- 주의사항",
+                "category": "other",
+                "tags": ["요리", "레시피", "계산"],
+                "usage_count": 67,
+                "is_favorite": False,
+            },
+            {
+                "title": "여행 일정 플래너",
+                "content": "다음 정보로 여행 일정을 계획해주세요:\n\n목적지: [도시/국가]\n기간: [X박 Y일]\n예산: [예산]\n관심사: [문화/음식/쇼핑/자연]\n인원: [인원수]\n\n일정 구성:\n- 일자별 동선\n- 추천 명소\n- 식당 추천\n- 교통 수단\n- 숙소 추천\n- 예산 분배\n- 준비물 체크리스트",
+                "category": "other",
+                "tags": ["여행", "계획", "관광"],
+                "usage_count": 201,
+                "is_favorite": True,
+            },
+        ]
+
+        # 기존 데이터 삭제
+        Prompt.objects.all().delete()
+
+        # 샘플 데이터 생성
+        for data in sample_prompts:
+            Prompt.objects.create(**data)
+
+        self.stdout.write(self.style.SUCCESS(f"✅ {len(sample_prompts)}개의 샘플 프롬프트가 생성되었습니다."))

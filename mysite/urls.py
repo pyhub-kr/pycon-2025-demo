@@ -9,4 +9,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("roleplay/", include("roleplay.urls")),
     path("todo/", include("todo.urls")),
+    path("prompts/", include("prompts.urls")),
 ]

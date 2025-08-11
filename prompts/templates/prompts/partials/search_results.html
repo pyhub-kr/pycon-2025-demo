@@ -1,0 +1,37 @@
+<!-- HTMX 요청일 때만 카테고리 버튼 OOB 업데이트 -->
+{% if request.META.HTTP_HX_REQUEST %}
+    {% include 'prompts/partials/category_buttons.html' %}
+{% endif %}
+
+<!-- 검색 결과 -->
+<div id="search-results">
+    {% if query %}
+        <!-- 검색 결과 헤더 -->
+        <div class="mb-4 p-3 bg-blue-50 rounded-lg">
+            <p class="text-sm text-blue-700">
+                "{{ query }}" 검색 결과: {{ prompts|length }}개
+            </p>
+        </div>
+    {% endif %}
+
+    {% if prompts %}
+        <!-- 프롬프트 목록 -->
+        {% for prompt in prompts %}
+            {% include 'prompts/partials/prompt_item.html' %}
+        {% endfor %}
+    {% else %}
+        <!-- 빈 결과 -->
+        <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="mt-4 text-gray-500">
+                {% if query %}
+                    "{{ query }}"에 대한 검색 결과가 없습니다.
+                {% else %}
+                    등록된 프롬프트가 없습니다.
+                {% endif %}
+            </p>
+        </div>
+    {% endif %}
+</div>

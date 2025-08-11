@@ -1,0 +1,61 @@
+<div id="prompt-{{ prompt.id }}" 
+     class="p-4 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer">
+    
+    <div class="flex items-start justify-between">
+        <div class="flex-1">
+            <!-- 제목 -->
+            <h3 class="text-lg font-semibold text-gray-800 mb-1">
+                {% if prompt.is_favorite %}⭐{% endif %}
+                {{ prompt.title }}
+            </h3>
+            
+            <!-- 메타 정보 -->
+            <div class="flex items-center gap-4 text-sm text-gray-500 mb-2">
+                <span class="px-2 py-1 bg-gray-100 rounded">
+                    {{ prompt.get_category_display }}
+                </span>
+                <span>사용: {{ prompt.usage_count }}회</span>
+                <span>{{ prompt.created_at|date:"Y.m.d" }}</span>
+            </div>
+            
+            <!-- 내용 미리보기 -->
+            <p class="text-gray-600 line-clamp-2">
+                {% if query %}
+                    {{ prompt.content|truncatewords:30 }}
+                {% else %}
+                    {{ prompt.content|truncatewords:30 }}
+                {% endif %}
+            </p>
+            
+            <!-- 태그 -->
+            {% if prompt.tags %}
+            <div class="mt-2 flex flex-wrap gap-1">
+                {% for tag in prompt.tags %}
+                <span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded">
+                    #{{ tag }}
+                </span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- 액션 버튼 -->
+        <div class="flex flex-col gap-2 ml-4">
+            <button hx-post="{% url 'prompts:toggle_favorite' prompt.id %}"
+                    hx-target="#prompt-{{ prompt.id }}"
+                    hx-swap="outerHTML"
+                    class="p-2 text-yellow-500 hover:bg-yellow-50 rounded transition-colors"
+                    title="즐겨찾기">
+                {% if prompt.is_favorite %}★{% else %}☆{% endif %}
+            </button>
+            
+            <button hx-get="{% url 'prompts:detail' prompt.id %}"
+                    hx-target="#prompt-detail"
+                    hx-swap="innerHTML"
+                    class="p-2 text-blue-500 hover:bg-blue-50 rounded transition-colors"
+                    title="상세보기">
+                👁️
+            </button>
+        </div>
+    </div>
+</div>

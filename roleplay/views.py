@@ -63,6 +63,7 @@ def chat(request, pk) -> HttpResponse | StreamingHttpResponse:
         return render(request, "roleplay/chat.html", context_data)
 
     else:
+
         def make_stream() -> Generator[str, None, None]:
             try:
                 # TODO: Django Form 등을 활용한 유효성 검사

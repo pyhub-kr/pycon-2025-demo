@@ -1,0 +1,7 @@
+<div id="error-{{ field_name }}" class="mt-1">
+    {% if error %}
+        <p class="text-sm text-red-600">{{ error }}</p>
+    {% else %}
+        <p class="text-sm text-green-600">✓ 유효합니다</p>
+    {% endif %}
+</div>

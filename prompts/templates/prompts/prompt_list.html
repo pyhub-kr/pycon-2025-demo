@@ -2,7 +2,13 @@
 
 {% block content %}
 <div class="bg-white rounded-lg shadow-lg p-6">
-    <h1 class="text-3xl font-bold text-gray-800 mb-8">🤖 프롬프트 관리 시스템</h1>
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">🤖 프롬프트 관리 시스템</h1>
+        <a href="{% url 'prompts:create' %}" 
+           class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+            ➕ 새 프롬프트
+        </a>
+    </div>
     
     <!-- 검색 영역 -->
     <div class="mb-8">

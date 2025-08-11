@@ -1,0 +1,208 @@
+{% extends 'prompts/base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">
+            {% if form.instance.pk %}
+                ✏️ 프롬프트 수정  
+            {% else %}
+                ➕ 새 프롬프트 만들기
+            {% endif %}
+        </h1>
+        
+        <!-- Alpine.js로 상태 관리 -->
+        <form method="post" 
+              id="prompt-form" 
+              class="space-y-6"
+              x-data="formValidation()"
+              @htmx:after-settle.window="handleValidation($event)">
+            {% csrf_token %}
+            
+            {% for field in form %}
+            <div class="field-wrapper" 
+                 :class="getFieldClass('{{ field.name }}')"
+                 id="wrapper-{{ field.name }}">
+                
+                {% if field.name != 'is_favorite' %}
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ field.label }}
+                        {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+                    </label>
+                    <div class="relative">
+                        {{ field }}
+                        <div id="loading-{{ field.name }}" class="htmx-indicator absolute right-2 top-3">
+                            <svg class="animate-spin h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    {% if field.help_text %}
+                    <p class="mt-1 text-sm text-gray-500">{{ field.help_text }}</p>
+                    {% endif %}
+                    <div id="error-{{ field.name }}" class="mt-1">
+                        {% if field.errors %}
+                            <p class="text-sm text-red-600">{{ field.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <!-- Checkbox field -->
+                    <div class="flex items-center">
+                        {{ field }}
+                        <label for="{{ field.id_for_label }}" class="ml-2 block text-sm text-gray-700">
+                            {{ field.label }}
+                        </label>
+                    </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            <!-- Validation Status with Alpine.js -->
+            <div id="validation-status" class="p-4 rounded-lg bg-gray-50">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">유효성 검사 상태</h3>
+                <div class="space-y-1">
+                    {% for field in form %}
+                    {% if field.name != 'is_favorite' %}
+                    <div id="status-{{ field.name }}" 
+                         class="flex items-center text-sm"
+                         :class="getStatusClass('{{ field.name }}')">
+                        <span class="mr-2" x-text="getStatusIcon('{{ field.name }}')">⏺️</span>
+                        {{ field.label }}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Submit Buttons with Alpine.js -->
+            <div class="flex gap-4 pt-4">
+                <button type="submit" 
+                        id="submit-btn"
+                        :disabled="!isFormValid"
+                        :class="submitButtonClass"
+                        class="px-6 py-3 font-medium rounded-lg transition-colors">
+                    {% if form.instance.pk %}
+                        수정하기
+                    {% else %}
+                        생성하기
+                    {% endif %}
+                </button>
+                <a href="{% url 'prompts:list' %}" 
+                   class="px-6 py-3 bg-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-400 transition-colors">
+                    취소
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra-head %}
+    <script src="//unpkg.com/alpinejs@3.x.x" defer></script>
+
+    <script>
+    function formValidation() {
+        return {
+            fieldStates: {
+                title: null,
+                content: null,
+                category: null,
+                tags: null
+            },
+            requiredFields: ['title', 'content', 'category'],
+
+            handleValidation(event) {
+                // HTMX after-settle 이벤트 처리 (DOM이 완전히 정리된 후)
+                const targetId = event.detail.target.id;
+                const match = targetId.match(/error-(\w+)/);
+
+                if (match) {
+                    const fieldName = match[1];
+                    // requestAnimationFrame으로 다음 렌더링 사이클까지 대기
+                    requestAnimationFrame(() => {
+                        const errorDiv = document.getElementById(`error-${fieldName}`);
+                        if (!errorDiv) return;
+
+                        // 에러 메시지 내용으로 직접 판단
+                        const errorMessage = errorDiv.querySelector('.text-red-600');
+                        const successMessage = errorDiv.querySelector('.text-green-600');
+
+                        // 상태 업데이트 (Alpine.js가 자동으로 UI 업데이트)
+                        if (errorMessage && errorMessage.textContent.trim()) {
+                            this.fieldStates[fieldName] = false;  // 에러 있음
+                        } else if (successMessage && successMessage.textContent.includes('✓')) {
+                            this.fieldStates[fieldName] = true;   // 유효함
+                        } else {
+                            // 초기 상태이거나 검증 전
+                            this.fieldStates[fieldName] = null;
+                        }
+                    });
+                }
+            },
+
+            getFieldClass(fieldName) {
+                if (this.fieldStates[fieldName] === true) {
+                    return 'field-valid';
+                } else if (this.fieldStates[fieldName] === false) {
+                    return 'field-invalid';
+                }
+                return '';
+            },
+
+            getStatusClass(fieldName) {
+                if (this.fieldStates[fieldName] === true) {
+                    return 'text-green-600';
+                } else if (this.fieldStates[fieldName] === false) {
+                    return 'text-red-600';
+                }
+                return '';
+            },
+
+            getStatusIcon(fieldName) {
+                if (this.fieldStates[fieldName] === true) {
+                    return '✅';
+                } else if (this.fieldStates[fieldName] === false) {
+                    return '❌';
+                }
+                return '⏺️';
+            },
+
+            get isFormValid() {
+                return this.requiredFields.every(field => this.fieldStates[field] === true);
+            },
+
+            get submitButtonClass() {
+                if (this.isFormValid) {
+                    return 'bg-blue-500 text-white hover:bg-blue-600';
+                }
+                return 'bg-gray-300 text-gray-500 cursor-not-allowed';
+            }
+        }
+    }
+    </script>
+
+    <style>
+        .htmx-indicator {
+            opacity: 0;
+            transition: opacity 200ms ease-in;
+        }
+        .htmx-request .htmx-indicator {
+            opacity: 1;
+        }
+
+        .field-valid input,
+        .field-valid textarea,
+        .field-valid select {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+
+        .field-invalid input,
+        .field-invalid textarea,
+        .field-invalid select {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+        }
+    </style>
+{% endblock %}

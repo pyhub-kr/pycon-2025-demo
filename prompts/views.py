@@ -1,7 +1,11 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
 from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
 from .models import Prompt
+from .forms import PromptForm
 
 
 def prompt_list(request):
@@ -73,3 +77,63 @@ def toggle_favorite(request, pk):
         return render(request, "prompts/partials/prompt_item.html", {"prompt": prompt})
 
     return JsonResponse({"error": "Method not allowed"}, status=405)
+
+
+def prompt_create(request):
+    """프롬프트 생성"""
+    if request.method == "POST":
+        form = PromptForm(request.POST)
+        if form.is_valid():
+            prompt = form.save()
+            return redirect("prompts:list")
+    else:
+        form = PromptForm()
+
+    # Alpine.js 버전 사용 (커스텀 JS 제거)
+    return render(request, "prompts/prompt_form.html", {"form": form})
+
+
+def prompt_update(request, pk):
+    """프롬프트 수정"""
+    prompt = get_object_or_404(Prompt, pk=pk)
+
+    if request.method == "POST":
+        form = PromptForm(request.POST, instance=prompt)
+        if form.is_valid():
+            form.save()
+            return redirect("prompts:list")
+    else:
+        form = PromptForm(instance=prompt)
+
+    # Alpine.js 버전 사용 (커스텀 JS 제거)
+    return render(request, "prompts/prompt_form.html", {"form": form})
+
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def validate_field(request, field_name):
+    """개별 필드 실시간 유효성 검사 - 리팩토링된 버전"""
+
+    # 폼 인스턴스 가져오기 (수정 모드 지원)
+    instance_pk = request.POST.get("instance_pk")
+    instance = None
+    if instance_pk:
+        try:
+            instance = Prompt.objects.get(pk=instance_pk)
+        except Prompt.DoesNotExist:
+            pass
+
+    # PromptForm 생성 (인스턴스 전달)
+    form = PromptForm(instance=instance)
+
+    # 필드 값 가져오기
+    field_value = request.POST.get(field_name, "")
+
+    # 단일 필드 검증 수행
+    is_valid, error_message = form.validate_single_field(field_name, field_value)
+
+    return render(
+        request,
+        "prompts/partials/field_error.html",
+        {"field_name": field_name, "error": error_message if not is_valid else None},
+    )

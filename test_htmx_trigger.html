@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HTMX Trigger Test</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-8">
+    <h1 class="text-2xl font-bold mb-4">HTMX Trigger 테스트</h1>
+    
+    <div class="space-y-4 max-w-md">
+        <div>
+            <label class="block mb-2">테스트 1: blur만 사용</label>
+            <input type="text" 
+                   class="w-full p-2 border rounded"
+                   hx-get="/test"
+                   hx-trigger="blur"
+                   placeholder="포커스 후 다른 곳 클릭">
+            <div class="text-sm text-gray-500 mt-1">blur 이벤트만 트리거</div>
+        </div>
+        
+        <div>
+            <label class="block mb-2">테스트 2: blur, change delay:500ms</label>
+            <input type="text" 
+                   class="w-full p-2 border rounded"
+                   hx-get="/test"
+                   hx-trigger="blur, change delay:500ms"
+                   placeholder="포커스 후 다른 곳 클릭 또는 값 변경">
+            <div class="text-sm text-gray-500 mt-1">blur 즉시 또는 change 후 500ms</div>
+        </div>
+        
+        <div>
+            <label class="block mb-2">테스트 3: blur changed delay:500ms (기존)</label>
+            <input type="text" 
+                   class="w-full p-2 border rounded"
+                   hx-get="/test"
+                   hx-trigger="blur changed delay:500ms"
+                   placeholder="값 변경 후 포커스 이동 시에만">
+            <div class="text-sm text-gray-500 mt-1">값이 변경되고 blur 될 때만</div>
+        </div>
+    </div>
+    
+    <div class="mt-8 p-4 bg-gray-100 rounded">
+        <h2 class="font-bold mb-2">동작 차이점:</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm">
+            <li><strong>blur</strong>: 포커스를 잃을 때마다 즉시 트리거</li>
+            <li><strong>blur, change delay:500ms</strong>: 포커스를 잃으면 즉시 OR 값 변경 후 500ms</li>
+            <li><strong>blur changed</strong>: 값이 변경되고 포커스를 잃을 때만</li>
+        </ul>
+    </div>
+    
+    <script>
+        // 요청 로그 표시
+        document.body.addEventListener('htmx:beforeRequest', function(evt) {
+            console.log('HTMX Request triggered by:', evt.detail.elt.placeholder);
+        });
+    </script>
+</body>
+</html>

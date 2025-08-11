@@ -19,7 +19,6 @@ class DjangoChatHistoryStore(BaseChatHistoryStore):
         """
         self.session = session
 
-
     def add_message(self, message: Message) -> None:
         """메시지를 데이터베이스에 추가"""
 

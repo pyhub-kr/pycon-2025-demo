@@ -6,7 +6,7 @@ from django.utils import timezone
 
 class WeatherService:
     CACHE_DURATION = 600  # 10 minutes in seconds
-    
+
     # 날씨 상태 옵션
     WEATHER_CONDITIONS = [
         ("맑음", "01d"),
@@ -20,42 +20,42 @@ class WeatherService:
 
     def get_weather(self, lat, lon, location_name=None):
         cache_key = f"weather_{lat}_{lon}"
-        
+
         # 캐시 체크 (선택사항 - 더 동적인 데이터를 원하면 주석 처리)
         # cached_data = cache.get(cache_key)
         # if cached_data:
         #     return cached_data
-        
+
         # 랜덤 날씨 데이터 생성
         weather_data = self.generate_random_weather(location_name)
-        
+
         # 캐시 저장 (선택사항)
         # cache.set(cache_key, weather_data, self.CACHE_DURATION)
-        
+
         return weather_data
 
     def generate_random_weather(self, location_name=None):
         # 랜덤 날씨 상태 선택
         condition, icon = random.choice(self.WEATHER_CONDITIONS)
-        
+
         # 기온 생성 (계절감 있게)
         base_temp = random.uniform(15, 30)
         temp = round(base_temp + random.uniform(-2, 2), 1)
         feels_like = round(temp + random.uniform(-2, 3), 1)
         temp_min = round(temp - random.uniform(2, 5), 1)
         temp_max = round(temp + random.uniform(2, 5), 1)
-        
+
         # 습도와 풍속
         humidity = random.randint(30, 90)
         wind_speed = round(random.uniform(0, 10), 1)
-        
+
         # 일출/일몰 시간 (고정값에 약간의 변화)
         now = datetime.now()
         sunrise_hour = 6 + random.randint(-30, 30) // 60
         sunrise_minute = random.randint(0, 59)
         sunset_hour = 18 + random.randint(-30, 30) // 60
         sunset_minute = random.randint(0, 59)
-        
+
         return {
             "location": location_name or "서울",
             "temp": temp,

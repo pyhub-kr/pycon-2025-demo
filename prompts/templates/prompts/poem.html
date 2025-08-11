@@ -1,0 +1,77 @@
+{% extends "prompts/base.html" %}
+
+{% block title %}AI 시인 - 프롬프트{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">🎭 AI 시인</h1>
+    
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <!-- 입력 폼 -->
+        <form id="ai-form"
+              hx-post="{% url 'prompts:poem' %}"
+              hx-target="#result"
+              hx-indicator="#loading"
+              hx-on::before-request="this.querySelectorAll('input, button').forEach(el => el.disabled = true)"
+              class="mb-6"
+              novalidate>
+            {% csrf_token %}
+            <div class="flex gap-2">
+                <input type="text" 
+                       name="message" 
+                       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                       placeholder="시의 주제나 영감을 입력하세요... (예: 가을 단풍, 첫사랑의 설렘, 비 오는 날의 추억)"
+                       required
+                       autofocus />
+                <button type="submit" 
+                        class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-200 flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    <span>시 작성</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                    </svg>
+                </button>
+            </div>
+        </form>
+        
+        <!-- 로딩 인디케이터 -->
+        <div id="loading" class="htmx-indicator">
+            <div class="flex items-center justify-center p-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                <span class="ml-3 text-gray-600">시상이 떠오르는 중...</span>
+            </div>
+        </div>
+        
+        <!-- 결과 표시 영역 -->
+        <div id="result" 
+             hx-on::after-swap="let form = document.getElementById('ai-form'); form.reset(); form.querySelectorAll('input, button').forEach(el => el.disabled = false); form.querySelector('input[name=message]').focus()">
+            <!-- AI 시가 여기 표시됩니다 -->
+            <div class="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg text-gray-600 text-center">
+                <p>✨ 시의 주제나 영감을 입력하세요</p>
+                <p class="text-sm mt-2">AI가 아름다운 시를 작성해드립니다.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 사용 팁 -->
+    <div class="mt-6 p-4 bg-purple-50 rounded-lg">
+        <h3 class="font-semibold text-purple-900 mb-2">🌸 시 작성 팁</h3>
+        <ul class="text-sm text-purple-800 space-y-1">
+            <li>• 계절, 감정, 추억 등 다양한 주제를 입력해보세요</li>
+            <li>• "~에 대한 시", "~를 주제로 한 시" 형식도 좋습니다</li>
+            <li>• 단어 하나만 입력해도 멋진 시가 탄생합니다</li>
+            <li>• 한국어로 아름다운 시를 작성해드립니다</li>
+        </ul>
+    </div>
+</div>
+
+<style>
+    /* HTMX 인디케이터 스타일 */
+    .htmx-indicator {
+        display: none;
+    }
+    
+    .htmx-request .htmx-indicator {
+        display: block;
+    }
+</style>
+{% endblock %}

@@ -22,7 +22,6 @@ class Prompt(models.Model):
     title = models.CharField(
         max_length=200,
         verbose_name="제목",
-        unique=True,  # 중복 방지
         validators=get_title_validators(),
         help_text="5-200자, 특수문자 제한",
     )

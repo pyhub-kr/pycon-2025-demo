@@ -74,16 +74,17 @@ def validate_tags_list(value):
             raise ValidationError(f'태그 "{tag}"가 너무 깁니다. (최대 20자)', params={"tag": tag}, code="tag_too_long")
 
 
-def validate_unique_title(value):
-    """
-    제목 중복 체크 validator
-    주의: 이 validator는 모델의 clean() 메서드에서 사용하는 것이 좋습니다.
-    field validator로 사용 시 수정 모드에서 문제가 발생할 수 있습니다.
-    """
-    from .models import Prompt
-
-    if Prompt.objects.filter(title=value).exists():
-        raise ValidationError("이미 존재하는 제목입니다.", code="duplicate_title")
+# 제목 중복은 허용되므로 이 validator는 사용하지 않음
+# def validate_unique_title(value):
+#     """
+#     제목 중복 체크 validator
+#     주의: 이 validator는 모델의 clean() 메서드에서 사용하는 것이 좋습니다.
+#     field validator로 사용 시 수정 모드에서 문제가 발생할 수 있습니다.
+#     """
+#     from .models import Prompt
+#
+#     if Prompt.objects.filter(title=value).exists():
+#         raise ValidationError("이미 존재하는 제목입니다.", code="duplicate_title")
 
 
 # 편의를 위한 복합 validator 생성 함수

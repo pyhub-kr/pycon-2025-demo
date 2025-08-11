@@ -7,8 +7,8 @@
             <h3 class="text-lg font-semibold text-gray-800 mb-1">
                 <a href="#" 
                    hx-get="{% url 'prompts:detail' prompt.id %}"
-                   hx-target="#prompt-detail"
-                   hx-swap="innerHTML"
+                   hx-target="body"
+                   hx-swap="beforeend"
                    class="hover:text-blue-600 transition-colors">
                     {% if prompt.is_favorite %}⭐{% endif %}
                     {{ prompt.title }}

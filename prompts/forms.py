@@ -60,7 +60,12 @@ class PromptForm(HTMXValidationMixin, forms.ModelForm):
         # 초기값 설정 (수정 시)
         if self.instance and self.instance.pk:
             if self.instance.tags:
-                self.fields["tags"].initial = ", ".join(self.instance.tags)
+                # initial과 data 모두 설정하여 올바르게 표시되도록 함
+                tags_str = ", ".join(self.instance.tags)
+                self.fields["tags"].initial = tags_str
+                # GET 요청(수정 폼 표시)일 때만 data 설정
+                if not self.data:
+                    self.initial["tags"] = tags_str
 
         # FormHelper 설정
         self.helper = FormHelper()

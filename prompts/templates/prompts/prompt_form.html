@@ -58,30 +58,26 @@
             </div>
             {% endfor %}
             
-            <!-- Validation Status with Alpine.js -->
-            <div id="validation-status" class="p-4 rounded-lg bg-gray-50">
-                <h3 class="text-sm font-semibold text-gray-700 mb-2">유효성 검사 상태</h3>
-                <div class="space-y-1">
+            <!-- 유효성 검사 상태 (선택적 표시, 더 간소화) -->
+            <!-- 제거 또는 필요시 주석 해제
+            <div id="validation-status" class="p-3 rounded-lg bg-gray-50 text-xs">
+                <div class="flex gap-4">
                     {% for field in form %}
                     {% if field.name != 'is_favorite' %}
-                    <div id="status-{{ field.name }}" 
-                         class="flex items-center text-sm"
-                         :class="getStatusClass('{{ field.name }}')">
-                        <span class="mr-2" x-text="getStatusIcon('{{ field.name }}')">⏺️</span>
-                        {{ field.label }}
-                    </div>
+                    <span :class="getStatusClass('{{ field.name }}')">
+                        <span x-text="getStatusIcon('{{ field.name }}')"></span> {{ field.label }}
+                    </span>
                     {% endif %}
                     {% endfor %}
                 </div>
             </div>
+            -->
             
-            <!-- Submit Buttons with Alpine.js -->
+            <!-- Submit Buttons -->
             <div class="flex gap-4 pt-4">
                 <button type="submit" 
                         id="submit-btn"
-                        :disabled="!isFormValid"
-                        :class="submitButtonClass"
-                        class="px-6 py-3 font-medium rounded-lg transition-colors">
+                        class="px-6 py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors">
                     {% if form.instance.pk %}
                         수정하기
                     {% else %}
@@ -104,11 +100,15 @@
     <script>
     function formValidation() {
         return {
+            // 수정 폼인지 확인 (form.instance.pk가 있으면 수정)
+            isEditMode: {{ form.instance.pk|default:"false" }},
+            
             fieldStates: {
-                title: null,
-                content: null,
-                category: null,
-                tags: null
+                // 수정 모드일 때는 초기값을 true로 설정 (이미 유효한 데이터)
+                title: {{ form.instance.pk|yesno:"true,null" }},
+                content: {{ form.instance.pk|yesno:"true,null" }},
+                category: {{ form.instance.pk|yesno:"true,null" }},
+                tags: {{ form.instance.pk|yesno:"true,null" }}
             },
             requiredFields: ['title', 'content', 'category'],
 
@@ -168,15 +168,15 @@
                 return '⏺️';
             },
 
+            // Submit 버튼은 항상 활성화되므로 아래 메서드는 더 이상 사용하지 않음
+            // 하지만 나중에 필요할 수 있으므로 유지
             get isFormValid() {
                 return this.requiredFields.every(field => this.fieldStates[field] === true);
             },
 
-            get submitButtonClass() {
-                if (this.isFormValid) {
-                    return 'bg-blue-500 text-white hover:bg-blue-600';
-                }
-                return 'bg-gray-300 text-gray-500 cursor-not-allowed';
+            get allFieldsValidated() {
+                // 모든 필드가 검증되었는지 확인 (null이 아닌 상태)
+                return Object.values(this.fieldStates).every(state => state !== null);
             }
         }
     }

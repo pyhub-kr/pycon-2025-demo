@@ -146,15 +146,16 @@ def validate_field(request, field_name):
     )
 
 
-@require_POST
 def poem_view(request):
-    """AI 시 생성 뷰"""
-    message = request.POST.get("message", "").strip()
+    """AI 시 생성 통합 뷰"""
+    if request.method == "POST":
+        # 시 생성 처리
+        message = request.POST.get("message", "").strip()
 
-    if message:
-        try:
-            # 시 작성을 위한 프롬프트
-            poem_prompt = f"""주제 또는 영감: {message}
+        if message:
+            try:
+                # 시 작성을 위한 프롬프트
+                poem_prompt = f"""주제 또는 영감: {message}
 
 위 주제로 한국어로 아름답고 감성적인 시를 작성해주세요.
 - 4-8줄 정도의 짧은 시
@@ -162,27 +163,21 @@ def poem_view(request):
 - 감성적이고 서정적인 표현
 - 한국어의 아름다움을 살린 표현"""
 
-            client = OpenAI(api_key=settings.OPENAI_API_KEY)
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": poem_prompt}],
-                max_tokens=200,
-                temperature=0.9,  # 창의성을 위해 온도 높임
-            )
-            ai_response = response.choices[0].message.content
-        except Exception as e:
-            ai_response = f"오류가 발생했습니다: {str(e)}"
-    else:
-        ai_response = "시의 주제를 입력해주세요."
+                client = OpenAI(api_key=settings.OPENAI_API_KEY)
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[{"role": "user", "content": poem_prompt}],
+                    max_tokens=200,
+                    temperature=0.9,  # 창의성을 위해 온도 높임
+                )
+                ai_response = response.choices[0].message.content
+            except Exception as e:
+                ai_response = f"오류가 발생했습니다: {str(e)}"
+        else:
+            ai_response = "시의 주제를 입력해주세요."
 
-    # HTMX 요청인지 확인
-    if request.headers.get("HX-Request"):
+        # POST 요청은 항상 부분 템플릿 반환 (HTMX 응답용)
         return render(request, "prompts/partials/poem_response.html", {"poem": ai_response, "theme": message})
 
-    # 일반 요청인 경우 전체 페이지 반환
-    return render(request, "prompts/poem.html", {"poem": ai_response, "theme": message})
-
-
-def poem_page(request):
-    """AI 시 페이지"""
+    # GET 요청 - 전체 페이지 표시
     return render(request, "prompts/poem.html")

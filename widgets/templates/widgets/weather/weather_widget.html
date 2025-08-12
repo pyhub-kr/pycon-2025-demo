@@ -2,7 +2,7 @@
      class="bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg relative"
      hx-get="{% url 'widgets:weather' %}?delay=1"
      hx-vals='js:{"_": Date.now()}'
-     hx-trigger="every 10s"
+     hx-trigger="load delay:10s"
      hx-swap="outerHTML"
      hx-indicator="#weather-indicator">
   

@@ -1,0 +1,50 @@
+<div class="activity-section">
+    <h2>
+        {% if list_type == 'login' %}
+            🔄 {{ title }}
+        {% else %}
+            🆕 {{ title }}
+        {% endif %}
+    </h2>
+    {% if users %}
+    <ul class="user-list">
+        {% for user in users %}
+        <li class="user-item">
+            <div class="user-info">
+                <div class="user-avatar" 
+                     {% if list_type != 'login' %}
+                     style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"
+                     {% endif %}>
+                    {{ user.username|first|upper }}
+                </div>
+                <div class="user-details">
+                    <span class="username">{{ user.username }}</span>
+                    <span class="user-email">{{ user.email|default:"이메일 없음" }}</span>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                {% if list_type == 'login' %}
+                    {% if user.last_login %}
+                    <span class="timestamp">{{ user.last_login|timesince }} 전</span>
+                    {% endif %}
+                    <span class="status-badge status-active">활동중</span>
+                {% else %}
+                    <span class="timestamp">{{ user.date_joined|timesince }} 전 가입</span>
+                    <span class="status-badge status-new">신규</span>
+                {% endif %}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="empty-state">
+        <p>
+            {% if list_type == 'login' %}
+                최근 로그인한 사용자가 없습니다.
+            {% else %}
+                최근 가입한 사용자가 없습니다.
+            {% endif %}
+        </p>
+    </div>
+    {% endif %}
+</div>

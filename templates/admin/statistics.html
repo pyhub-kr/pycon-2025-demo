@@ -1,0 +1,386 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .dashboard-container {
+        padding: 20px;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    .stat-card {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .stat-card h3 {
+        margin: 0 0 10px 0;
+        color: #333;
+        font-size: 14px;
+        text-transform: uppercase;
+        opacity: 0.7;
+    }
+    .stat-value {
+        font-size: 32px;
+        font-weight: bold;
+        color: #0066cc;
+        transition: color 0.3s;
+    }
+    .stat-value.updating {
+        color: #28a745;
+    }
+    .chart-container {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        position: relative;
+    }
+    .chart-title {
+        font-size: 18px;
+        margin-bottom: 20px;
+        color: #333;
+    }
+    canvas {
+        max-height: 400px;
+    }
+    .refresh-indicator {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: none;
+    }
+    .refreshing .refresh-indicator {
+        display: inline-block;
+    }
+    .chart-controls {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+    }
+    .chart-control-btn {
+        padding: 6px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: #f8f9fa;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 14px;
+    }
+    .chart-control-btn:hover {
+        background: #e9ecef;
+    }
+    .chart-control-btn.active {
+        background: #0066cc;
+        color: white;
+        border-color: #0066cc;
+    }
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    .updating {
+        animation: pulse 1s infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container" x-data="dashboardApp()">
+    <h1>📊 실시간 통계 대시보드</h1>
+    
+    <!-- 자동 새로고침 토글 -->
+    <div style="margin-bottom: 20px;">
+        <label style="display: inline-flex; align-items: center; gap: 10px; cursor: pointer;">
+            <input type="checkbox" x-model="autoRefresh" @change="toggleAutoRefresh()">
+            <span>자동 새로고침 (5초마다)</span>
+        </label>
+        <span x-show="lastUpdate" style="margin-left: 20px; color: #666; font-size: 14px;">
+            마지막 업데이트: <span x-text="lastUpdate"></span>
+        </span>
+    </div>
+    
+    <!-- 통계 카드 - HTMX로 자동 업데이트 -->
+    <div hx-get="{% url 'admin:admin_api_statistics_cards' %}"
+         hx-trigger="load, every 5s[autoRefresh]"
+         hx-swap="innerHTML"
+         hx-indicator=".htmx-indicator">
+        {% include 'admin/partials/statistics_cards.html' %}
+    </div>
+    
+    <!-- 차트 컨트롤 -->
+    <div class="chart-container">
+        <h2 class="chart-title">일별 트래픽 (최근 7일)</h2>
+        <div class="refresh-indicator htmx-indicator"></div>
+        <div class="chart-controls">
+            <button class="chart-control-btn" @click="refreshChart('daily')" :class="{ 'active': refreshing.daily }">
+                새로고침
+            </button>
+            <button class="chart-control-btn" @click="changeChartType('daily', 'line')" :class="{ 'active': chartTypes.daily === 'line' }">
+                선 그래프
+            </button>
+            <button class="chart-control-btn" @click="changeChartType('daily', 'bar')" :class="{ 'active': chartTypes.daily === 'bar' }">
+                막대 그래프
+            </button>
+        </div>
+        <canvas id="dailyChart"></canvas>
+    </div>
+    
+    <div class="chart-container">
+        <h2 class="chart-title">월별 트래픽 (최근 6개월)</h2>
+        <div class="refresh-indicator htmx-indicator"></div>
+        <div class="chart-controls">
+            <button class="chart-control-btn" @click="refreshChart('monthly')" :class="{ 'active': refreshing.monthly }">
+                새로고침
+            </button>
+            <button class="chart-control-btn" @click="changeChartType('monthly', 'bar')" :class="{ 'active': chartTypes.monthly === 'bar' }">
+                막대 그래프
+            </button>
+            <button class="chart-control-btn" @click="changeChartType('monthly', 'line')" :class="{ 'active': chartTypes.monthly === 'line' }">
+                선 그래프
+            </button>
+        </div>
+        <canvas id="monthlyChart"></canvas>
+    </div>
+</div>
+
+<script>
+// Alpine.js 앱
+function dashboardApp() {
+    return {
+        autoRefresh: false,
+        lastUpdate: null,
+        charts: {
+            daily: null,
+            monthly: null
+        },
+        chartTypes: {
+            daily: 'line',
+            monthly: 'bar'
+        },
+        refreshing: {
+            daily: false,
+            monthly: false
+        },
+        
+        init() {
+            // 초기 차트 데이터 로드
+            this.loadChartData();
+            
+            // HTMX 이벤트 리스너
+            document.body.addEventListener('htmx:afterSwap', (evt) => {
+                if (evt.detail.target.id === 'stats-cards') {
+                    this.updateTimestamp();
+                }
+            });
+        },
+        
+        toggleAutoRefresh() {
+            if (this.autoRefresh) {
+                this.startAutoRefresh();
+            } else {
+                this.stopAutoRefresh();
+            }
+        },
+        
+        startAutoRefresh() {
+            this.refreshInterval = setInterval(() => {
+                this.loadChartData();
+            }, 5000);
+        },
+        
+        stopAutoRefresh() {
+            if (this.refreshInterval) {
+                clearInterval(this.refreshInterval);
+            }
+        },
+        
+        async loadChartData() {
+            try {
+                const response = await fetch('{% url "admin:admin_api_statistics_data" %}');
+                const data = await response.json();
+                
+                this.updateCharts(data);
+                this.updateTimestamp();
+            } catch (error) {
+                console.error('Failed to load chart data:', error);
+            }
+        },
+        
+        updateCharts(data) {
+            // 일별 차트 업데이트
+            this.updateChart('daily', data.daily_stats, 'dailyChart');
+            
+            // 월별 차트 업데이트
+            this.updateChart('monthly', data.monthly_stats, 'monthlyChart');
+        },
+        
+        updateChart(type, stats, canvasId) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            // 기존 차트 제거
+            if (this.charts[type]) {
+                this.charts[type].destroy();
+            }
+            
+            // 새 차트 생성
+            this.charts[type] = new Chart(ctx, {
+                type: this.chartTypes[type],
+                data: {
+                    labels: stats.map(item => item.date || item.month),
+                    datasets: [{
+                        label: '페이지뷰',
+                        data: stats.map(item => item.views),
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: this.chartTypes[type] === 'line' ? 
+                            'rgba(75, 192, 192, 0.2)' : 'rgba(54, 162, 235, 0.5)',
+                        tension: 0.1
+                    }, {
+                        label: '활성 사용자',
+                        data: stats.map(item => item.users),
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: this.chartTypes[type] === 'line' ? 
+                            'rgba(255, 99, 132, 0.2)' : 'rgba(255, 206, 86, 0.5)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 750
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        },
+        
+        async refreshChart(type) {
+            this.refreshing[type] = true;
+            await this.loadChartData();
+            setTimeout(() => {
+                this.refreshing[type] = false;
+            }, 500);
+        },
+        
+        changeChartType(chartName, newType) {
+            this.chartTypes[chartName] = newType;
+            this.loadChartData();
+        },
+        
+        updateTimestamp() {
+            const now = new Date();
+            this.lastUpdate = now.toLocaleTimeString('ko-KR');
+        }
+    }
+}
+
+// 초기 차트 데이터 (서버 사이드 렌더링)
+document.addEventListener('DOMContentLoaded', function() {
+    const dailyStats = {{ daily_stats|safe }};
+    const monthlyStats = {{ monthly_stats|safe }};
+    
+    // Alpine.js가 로드되기 전에 초기 차트 그리기
+    if (!window.Alpine) {
+        // 일별 차트
+        const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+        new Chart(dailyCtx, {
+            type: 'line',
+            data: {
+                labels: dailyStats.map(item => item.date),
+                datasets: [{
+                    label: '페이지뷰',
+                    data: dailyStats.map(item => item.views),
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1
+                }, {
+                    label: '활성 사용자',
+                    data: dailyStats.map(item => item.users),
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // 월별 차트
+        const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+        new Chart(monthlyCtx, {
+            type: 'bar',
+            data: {
+                labels: monthlyStats.map(item => item.month),
+                datasets: [{
+                    label: '페이지뷰',
+                    data: monthlyStats.map(item => item.views),
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }, {
+                    label: '활성 사용자',
+                    data: monthlyStats.map(item => item.users),
+                    backgroundColor: 'rgba(255, 206, 86, 0.5)',
+                    borderColor: 'rgba(255, 206, 86, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

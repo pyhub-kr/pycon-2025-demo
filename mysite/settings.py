@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "crispy_forms",
     "crispy_tailwind",
+    "accounts",
     "dashboard",
     "widgets",
     "roleplay",
@@ -150,3 +151,8 @@ CRISPY_TEMPLATE_PACK = "tailwind"
 
 # API Keys
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+
+# Authentication settings
+LOGIN_URL = "accounts:login"
+LOGIN_REDIRECT_URL = "dashboard:dashboard"
+LOGOUT_REDIRECT_URL = "dashboard:dashboard"

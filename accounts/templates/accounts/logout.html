@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}로그아웃 - 파이콘 2025{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-8 text-center">
+    <div class="mb-6">
+        <svg class="mx-auto h-16 w-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+    </div>
+    
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">로그아웃 되었습니다</h2>
+    
+    <p class="text-gray-600 mb-8">
+        성공적으로 로그아웃 되었습니다. 다시 만나요!
+    </p>
+    
+    <div class="space-y-3">
+        <a href="{% url 'accounts:login' %}" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200">
+            다시 로그인
+        </a>
+        <a href="{% url 'dashboard:dashboard' %}" class="block w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded transition duration-200">
+            홈으로 돌아가기
+        </a>
+    </div>
+</div>
+{% endblock %}

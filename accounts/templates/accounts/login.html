@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}로그인 - 파이콘 2025{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">로그인</h2>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="mb-4 p-4 rounded {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    {% if form.errors %}
+        <div class="mb-4 p-4 rounded bg-red-100 text-red-700">
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="mb-4">
+            <label for="{{ form.username.id_for_label }}" class="block text-gray-700 text-sm font-bold mb-2">
+                사용자명
+            </label>
+            <input type="text" name="username" id="{{ form.username.id_for_label }}" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                   value="{{ form.username.value|default:'' }}" required>
+        </div>
+        
+        <div class="mb-6">
+            <label for="{{ form.password.id_for_label }}" class="block text-gray-700 text-sm font-bold mb-2">
+                비밀번호
+            </label>
+            <input type="password" name="password" id="{{ form.password.id_for_label }}"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                   required>
+        </div>
+        
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200">
+            로그인
+        </button>
+    </form>
+    
+    <div class="mt-6 text-center space-y-2">
+        <p class="text-gray-600">
+            계정이 없으신가요? 
+            <a href="{% url 'accounts:signup' %}" class="text-blue-600 hover:text-blue-800 font-semibold">
+                회원가입
+            </a>
+        </p>
+        <p class="text-gray-600">
+            <a href="{% url 'password_reset' %}" class="text-blue-600 hover:text-blue-800 text-sm">
+                비밀번호를 잊으셨나요?
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock %}

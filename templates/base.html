@@ -25,10 +25,11 @@
                 </h1>
                 <nav class="space-x-4">
                     {% if user.is_authenticated %}
-                        <span class="text-sm">{{ user.username }}</span>
-                        <a href="{% url 'logout' %}" class="text-sm hover:text-blue-200">로그아웃</a>
+                        <a href="{% url 'accounts:profile' %}" class="text-sm hover:text-blue-200">{{ user.username }}</a>
+                        <a href="{% url 'accounts:logout' %}" class="text-sm hover:text-blue-200">로그아웃</a>
                     {% else %}
-                        <a href="{% url 'login' %}" class="text-sm hover:text-blue-200">로그인</a>
+                        <a href="{% url 'accounts:login' %}" class="text-sm hover:text-blue-200">로그인</a>
+                        <a href="{% url 'accounts:signup' %}" class="text-sm hover:text-blue-200">회원가입</a>
                     {% endif %}
                 </nav>
             </div>
